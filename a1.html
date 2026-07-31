@@ -82,7 +82,7 @@
         .v-azul { background: #003247; } .v-roxo {background: #6441a5; } .v-rosa {background: #bf279b; } 
         .brilho-ativo { box-shadow: 0 0 15px white; border: 2px solid white !important; z-index: 10; }
 
-        .padrao-linha { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #111; border-radius: 8px; margin-bottom: 5px; border: 1px solid #222; }
+        .padrao-linha { display: flex; justify-space-between; align-items: center; padding: 8px; background: #111; border-radius: 8px; margin-bottom: 5px; border: 1px solid #222; }
         .destaque-linha { border: 2px solid var(--cor-verde) !important; background: #002200 !important; }
         
         .painel-financeiro { background: #222; padding: 6px; border-radius: 10px; margin-bottom: 5px; display: flex; justify-content: space-around; }
@@ -214,6 +214,7 @@
     let historicoGreens = [], tendenciaGlobal = "ESTÁVEL", totalGreenGeral = 0, totalRedGeral = 0, tempoSeg = 0, cronoRodando = false, cronoInterval = null;
 
     function enviarTelegram(texto) {
+        // Envio para o Telegram
         const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
         const dados = {
             chat_id: TELEGRAM_CHAT_ID,
@@ -225,6 +226,17 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dados)
         }).catch(err => console.error("Erro Telegram:", err));
+
+        // Envio para o Servidor no Render (Site)
+        try {
+            fetch('https://robet-telegran.onrender.com/api/mensagens', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ texto: texto })
+            });
+        } catch (err) {
+            console.error("Erro ao enviar sinal para o Render:", err);
+        }
     }
 
     function toggleCrono() {
