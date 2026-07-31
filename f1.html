@@ -95,9 +95,7 @@
             cursor: pointer;
             font-weight: bold;
         }
-        .btn-scroll:hover {
-            background: var(--color-accent);
-        }
+        .btn-scroll:hover { background: var(--color-accent); }
 
         .odds-grid {
             display: grid;
@@ -440,7 +438,6 @@
         .btn-registrar-time { background-color: var(--color-accent); color: #fff; border: none; }
         .btn-registrar-time:hover { background-color: #512da8; }
 
-        /* Estilo para pré-visualização do telegram */
         .preview-telegram-box {
             background: #111115;
             border: 1px solid var(--border-color);
@@ -458,7 +455,7 @@
 
 <div class="container">
 
-    <!-- GRADE DE COMPACTA PARA CELULAR -->
+    <!-- GRADE DE ODDS -->
     <div class="card">
         <div class="card-header-actions">
             <h2>📊 Odds Adicionadas</h2>
@@ -470,17 +467,16 @@
         <div class="odds-grid" id="gridOdds"></div>
     </div>
 
-    <!-- SEÇÃO DE ENTRADA, GESTÃO DE BANCA E SINAL -->
+    <!-- ENTRADA, GESTÃO DE BANCA E TELEGRAM -->
     <div class="card">
         <div class="card-header-actions" style="display: flex; align-items: center; justify-content: space-between;">
             <h2 style="display: flex; align-items: center; gap: 6px; width: auto; margin: 0;">
                 ⌨️ Entrada de Dados
                 <span id="eficienciaHeaderDisplay" class="header-efficiency-display" style="display: none;"></span>
             </h2>
-            <button class="btn-action btn-enviar-sinal" style="padding: 4px 12px; font-size: 11px; border-radius: 4px;" onclick="enviarMensagemManualPlacar()">Enviar</button>
+            <button class="btn-action btn-enviar-sinal" style="padding: 4px 12px; font-size: 11px; border-radius: 4px;" onclick="enviarSinalTelegram()">Enviar</button>
         </div>
 
-        <!-- SIMULADOR DE GESTÃO DE BANCA -->
         <div class="banca-grid" style="margin-top: 12px;">
             <div class="banca-input-group">
                 <label>Valor da Banca (R$)</label>
@@ -511,10 +507,8 @@
         </div>
         <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 12px 0;">
 
-        <!-- INPUT DE ODD -->
         <input type="number" id="oddInput" placeholder="Ex: 0022123456" autocomplete="off">
         
-        <!-- INPUTS DE TIMES E BOTÕES DE AÇÃO -->
         <div class="teams-section">
             <input type="text" id="timeUmInput" class="team-input" placeholder="Time da Casa" list="listaTimesRegistrados" autocomplete="off" oninput="atualizarPreviewTelegram()">
             <input type="text" id="timeDoisInput" class="team-input" placeholder="Time Visitante" list="listaTimesRegistrados" autocomplete="off" oninput="atualizarPreviewTelegram()">
@@ -527,8 +521,7 @@
             <button class="btn-action btn-enviar-sinal" onclick="enviarSinalTelegram()">Enviar Sinal</button>
         </div>
 
-        <!-- PRÉ-VISUALIZAÇÃO DA MENSAGEM DO TELEGRAM -->
-        <div style="margin-top: 8px; font-size: 10px; color: var(--text-muted); font-weight: bold;">Pré-visualização do Telegram (O que será enviado):</div>
+        <div style="margin-top: 8px; font-size: 10px; color: var(--text-muted); font-weight: bold;">Pré-visualização do Telegram:</div>
         <div id="previewTelegram" class="preview-telegram-box">Carregando preview...</div>
 
         <div class="vacuo-container">
@@ -545,7 +538,7 @@
         <button class="btn-clear" onclick="limparHistorico()">Limpar Todo o Histórico</button>
     </div>
 
-    <!-- SEÇÃO DO RANKING ATUALIZADA -->
+    <!-- RANKING DE EFICIÊNCIA -->
     <div class="card">
         <div class="card-header-actions">
             <h2>🏆 Ranking de Eficiência das Odds</h2>
@@ -569,7 +562,6 @@
     let cacheRankingMapeado = {}; 
     let oddSelecionadaAzul = null;
 
-    // Estágio atual do Ciclo (0 = Entrada Principal, 1 = 1º Martingale, 2 = 2º Martingale, 3 = 3º Martingale)
     let estagioCiclo = 0; 
 
     const oddInput = document.getElementById('oddInput');
@@ -613,12 +605,10 @@
     };
 
     function calcularStakesManual() {
-        // Dobra automaticamente os valores dos martingales com base na aposta principal
         let principal = parseFloat(inputStake1.value) || 0;
         inputStake2.value = (principal * 2).toFixed(2);
         inputStake3.value = (principal * 4).toFixed(2);
         inputStake4.value = (principal * 8).toFixed(2);
-
         atualizarPreviewTelegram();
     }
 
@@ -757,9 +747,6 @@
         }
     }
 
-    // Variável para armazenar a última mensagem de Green/Red gerada pelo preenchimento do placar
-    let ultimaMensagemResultadoPendente = "";
-
     function tratarInputPlacar(event, id) {
         let input = event.target;
         let valor = input.value.replace(/\D/g, ''); 
@@ -774,17 +761,20 @@
         const indice = bancoOdds.findIndex(o => o.id === id);
         if (indice !== -1) {
             bancoOdds[indice].placar = valor;
-            bancoOdds[indice].status = calcularStatusPorPlacar(valor);
+            let novoStatus = calcularStatusPorPlacar(valor);
+            bancoOdds[indice].status = novoStatus;
             
             localStorage.setItem('banco_odds_btts', JSON.stringify(bancoOdds));
             atualizarPainelDinamico();
             
             let boxPai = input.closest('.odd-box');
+            let mensagemParaEnviar = "";
+
             if (boxPai) {
                 boxPai.classList.remove('green', 'red');
                 let cabecalhoVirt = "🚨 *FUTEBOL VIRTUAL (PREMIER LEAGUE)* 🚨\n\n";
 
-                if (bancoOdds[indice].status === 1) {
+                if (novoStatus === 1) {
                     boxPai.classList.add('green');
                     let t1 = timeUmInput.value.trim() || "Time A";
                     let t2 = timeDoisInput.value.trim() || "Time B";
@@ -792,29 +782,28 @@
                     let stakeInfo = obterDadosStakeAtual();
                     let retornoEstimado = calcularRetornoEstimado(oddVal, stakeInfo.valor);
                     
-                    ultimaMensagemResultadoPendente = `${cabecalhoVirt}✅ *BATEU AMBAS MARCAM!* ✅\n\n⚽ *${t1} vs ${t2}*\n📊 Odd: ${oddVal}\n🎯 Placar: ${valor}\n💵 Stake: R$ ${stakeInfo.valor.toFixed(2)} (${stakeInfo.nome})\n📈 Retorno: R$ ${retornoEstimado}`;
-                    
-                    // Reseta para a entrada principal após bater o Green
+                    mensagemParaEnviar = `${cabecalhoVirt}✅ *BATEU AMBAS MARCAM!* ✅\n\n⚽ *${t1} vs ${t2}*\n📊 Odd: ${oddVal}\n🎯 Placar: ${valor}\n💵 Stake: R$ ${stakeInfo.valor.toFixed(2)} (${stakeInfo.nome})\n📈 Retorno: R$ ${retornoEstimado}`;
                     estagioCiclo = 0;
-                }
-                if (bancoOdds[indice].status === 2) {
+                } else if (novoStatus === 2) {
                     boxPai.classList.add('red');
-                    // Avança para o próximo estágio de Martingale apenas ao preencher o placar
                     if (estagioCiclo < 3) {
                         estagioCiclo++;
-                        // Prepara uma mensagem indicando o próximo martingale se necessário
                         let nomeMart = estagioCiclo === 1 ? "1º Martingale" : (estagioCiclo === 2 ? "2º Martingale" : "3º Martingale");
                         let t1 = timeUmInput.value.trim() || "Time A";
                         let t2 = timeDoisInput.value.trim() || "Time B";
                         let oddVal = bancoOdds[indice].valor;
                         let stakeInfo = obterDadosStakeAtual();
                         let retornoEstimado = calcularRetornoEstimado(oddVal, stakeInfo.valor);
-                        ultimaMensagemResultadoPendente = `${cabecalhoVirt}⚠️ *NÃO BATEU AMBAS - ${nomeMart.toUpperCase()}* ⚠️\n\nA entrada anterior não bateu. Vamos para o *${nomeMart}* (Ambas Marcam).\n\n⚽ *${t1} vs ${t2}*\n⏱ Próximo Jogo: ${bancoOdds[indice].tempo}\n📊 Odd Atual: ${oddVal}\n💵 Stake (${nomeMart}): R$ ${stakeInfo.valor.toFixed(2)}\n📈 Retorno Estimado: R$ ${retornoEstimado}`;
+                        mensagemParaEnviar = `${cabecalhoVirt}⚠️ *NÃO BATEU AMBAS - ${nomeMart.toUpperCase()}* ⚠️\n\nA entrada anterior não bateu. Vamos para o *${nomeMart}* (Ambas Marcam).\n\n⚽ *${t1} vs ${t2}*\n⏱ Próximo Jogo: ${bancoOdds[indice].tempo}\n📊 Odd Atual: ${oddVal}\n💵 Stake (${nomeMart}): R$ ${stakeInfo.valor.toFixed(2)}\n📈 Retorno Estimado: R$ ${retornoEstimado}`;
                     } else {
-                        ultimaMensagemResultadoPendente = `${cabecalhoVirt}🔴 *RED DEFINITIVO (3º MARTINGALE FALHOU)* 🔴\n\nCiclo de Martingales esgotado. Retornando à Entrada Principal no próximo ciclo.`;
+                        mensagemParaEnviar = `${cabecalhoVirt}🔴 *RED DEFINITIVO (3º MARTINGALE FALHOU)* 🔴\n\nCiclo de Martingales esgotado. Retornando à Entrada Principal no próximo ciclo.`;
                         estagioCiclo = 0;
                     }
                 }
+            }
+
+            if (mensagemParaEnviar) {
+                dispararMensagemTelegram(mensagemParaEnviar);
             }
 
             atualizarPreviewTelegram();
@@ -822,16 +811,6 @@
             if (oddSelecionadaAzul && bancoOdds[indice].valor === oddSelecionadaAzul) {
                 atualizarTextoHeaderEficiencia(oddSelecionadaAzul);
             }
-        }
-    }
-
-    function enviarMensagemManualPlacar() {
-        if (ultimaMensagemResultadoPendente) {
-            dispararMensagemTelegram(ultimaMensagemResultadoPendente);
-            alert("Mensagem de resultado enviada ao Telegram!");
-        } else {
-            // Se nenhum resultado de placar recente foi processado, envia o sinal padrão
-            enviarSinalTelegram();
         }
     }
 
@@ -993,7 +972,7 @@
         }
 
         ranking.sort((a, b) => b.pct - a.pct || b.greens - a.greens);
-        listaFavoritosAtuais = ranking.filter(r => r.pct >= 80).map(r => r.username || r.valor);
+        listaFavoritosAtuais = ranking.filter(r => r.pct >= 80).map(r => r.valor);
 
         cacheRankingMapeado = {};
         rankingContainer.innerHTML = '';
