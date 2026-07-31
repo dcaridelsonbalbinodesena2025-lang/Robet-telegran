@@ -1,0 +1,458 @@
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviator Pro - Analisador Inteligente</title>
+    <style>
+        :root {
+            --aviator-azul: #3498db;
+            --aviator-roxo: #9b59b6;
+            --aviator-rosa: #e91e63;
+            --cor-verde: #27ae60;
+            --cor-vermelha: #c0392b;
+            --cor-alerta: #f1c40f;
+            --azul-celeste: #007bff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial Black', sans-serif; }
+        body { background: #000; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; color: white; }
+
+        .topo-info {
+            display: flex;
+            width: 100%;
+            height: 50px;
+            background: #111;
+            border-bottom: 2px solid #333;
+            z-index: 2000;
+        }
+
+        .placar-geral { 
+            width: 50%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 20px; 
+            font-size: 1rem;
+            border-right: 1px solid #333;
+        }
+        .placar-g-geral { color: var(--cor-verde); }
+        .placar-r-geral { color: var(--cor-vermelha); }
+
+        .cronometro-box { 
+            width: 50%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 12px; 
+            font-size: 1rem;
+        }
+
+        .calculadora {
+            width: 95vw; max-width: 460px; height: 82vh; background: #1a1a1a;
+            border-radius: 20px; border: 2px solid #333; padding: 8px;
+            display: flex; flex-direction: column; position: relative; margin-top: 10px;
+        }
+
+        .brilho-verde { color: #00ff00 !important; text-shadow: 0 0 10px #00ff00; transition: 0.3s; }
+        .brilho-vermelho { color: #ff0000 !important; text-shadow: 0 0 10px #ff0000; transition: 0.3s; }
+        .texto-amarelo { color: var(--cor-alerta) !important; transition: 0.3s; }
+
+        .tab-content { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+        .tab-content.active { display: flex; }
+        .btn-voltar { background: #333; color: white; border: none; padding: 10px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; font-weight: bold; width: 100%; }
+
+        .ciclo-badge { font-size: 0.75rem; color: #fff; font-weight: bold; background: #222; padding: 2px 8px; border-radius: 4px; margin-left: 5px; border: 1px solid #444; }
+        .ciclo-perigo { color: #ff0000 !important; border-color: #ff0000 !important; animation: piscarAlerta 0.5s infinite; }
+        @keyframes piscarAlerta { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
+
+        .grid-historico { display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding: 10px; flex: 1; }
+        .linha-green { display: flex; flex-wrap: wrap; gap: 5px; padding: 10px; border: 1px solid #333; border-radius: 10px; background: #111; position: relative; margin-bottom: 10px;}
+        .linha-green::before { content: 'PADRÃO IDENTIFICADO'; position: absolute; top: -8px; left: 10px; font-size: 0.5rem; background: var(--cor-verde); padding: 2px 5px; border-radius: 3px; }
+
+        .card-vela { display: flex; align-items: center; border-radius: 4px; overflow: hidden; height: 32px; min-width: 72px; border: 1px solid transparent; }
+        .valor-vela { padding: 0 8px; font-size: 0.8rem; height: 100%; display: flex; align-items: center; justify-content: center; min-width: 45px; }
+        .forca-g-badge { width: 35px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; }
+        
+        .surf-baixa { background: #003247; } .badge-baixa { background: var(--azul-celeste); color: #000; }
+        .surf-alta { background: #6441a5; } .badge-alta { background: var(--cor-vermelha); color: #fff; }
+        .green-hit { border: 2px solid #00ff00 !important; box-shadow: 0 0 10px #00ff00; }
+
+        .grade { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; background: #000; padding: 5px; border-radius: 10px; height: 110px; margin-bottom: 5px; }
+        .vela { background: #222; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: bold; height: 28px; border: 1px solid transparent; }
+        .v-azul { background: #003247; } .v-roxo {background: #6441a5; } .v-rosa {background: #bf279b; } 
+        .brilho-ativo { box-shadow: 0 0 15px white; border: 2px solid white !important; z-index: 10; }
+
+        .padrao-linha { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #111; border-radius: 8px; margin-bottom: 5px; border: 1px solid #222; }
+        .destaque-linha { border: 2px solid var(--cor-verde) !important; background: #002200 !important; }
+        
+        .painel-financeiro { background: #222; padding: 6px; border-radius: 10px; margin-bottom: 5px; display: flex; justify-content: space-around; }
+        .fin-item { text-align: center; } .fin-label { font-size: 0.55rem; color: #aaa; display: block; } .fin-valor { font-size: 1rem; color: #fff; }
+        .tendencia-box { background: #000; padding: 5px 10px; border-radius: 8px; margin-bottom: 5px; border-left: 3px solid var(--aviator-azul); display: flex; justify-content: space-between; align-items: center; min-height: 40px;}
+        .tend-label { font-size: 0.6rem; color: #888; } .tend-status { font-size: 0.85rem; font-weight: bold; }
+        .painel-status { background: #000; padding: 6px; border-radius: 10px; margin-bottom: 5px; border: 1px solid #333; flex: 1; overflow-y: auto; }
+        #status-display { color: var(--cor-verde); font-weight: bold; font-size: 1.3rem; text-align: center; display: block; margin-bottom: 4px; }
+        
+        .visor { background: #000; border: 1px solid #333; border-radius: 10px; height: 40px; display: flex; align-items: center; justify-content: center; color: var(--cor-verde); font-size: 1.5rem; margin-bottom: 5px; }
+        
+        .teclado-grid { display: grid; grid-template-columns: repeat(3, 1fr) 1.2fr; grid-template-rows: repeat(4, 45px) 40px; gap: 5px; }
+        .btn-n { background: #333; color: white; border: none; border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
+        .btn-c { background: var(--cor-vermelha); color: white; border: none; border-radius: 8px; font-size: 1.3rem; font-weight: bold; cursor: pointer; }
+        .btn-acao { border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .btn-grade-inf { grid-area: 1 / 4 / 2 / 5; background: #444; color: white; font-size: 0.65rem; }
+        .btn-analisador { grid-area: 2 / 4 / 3 / 5; background: #ff0000; color: white; font-size: 0.65rem; }
+        .btn-entrar { grid-area: 3 / 4 / 5 / 5; background: var(--cor-verde); color: #000; font-size: 1.2rem; }
+        .btn-historico-full { grid-area: 5 / 1 / 6 / 5; background: #007bff; color: white; font-size: 0.9rem; }
+
+        .balao-p, .balao-g { display: inline-block; width: 22px; height: 22px; line-height: 22px; text-align: center; border-radius: 4px; font-size: 0.8rem; font-weight: bold; margin-right: 3px; color: white; }
+        .balao-p { background: #333; } .balao-g { background: var(--cor-verde); }
+        .sugestao-banner { text-align: center; padding: 15px; border-radius: 10px; margin-top: 10px; font-size: 1rem; border: 1px solid #444; font-weight: bold; background: #222; }
+
+        #modal-config { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); border-radius: 20px; display: none; flex-direction: column; padding: 15px; z-index: 2100; }
+        .input-config { width: 100%; padding: 8px; margin: 4px 0; background: #333; color: white; border: 1px solid #444; border-radius: 6px; }
+
+        .area-grade-infinita { flex: 1; overflow-y: auto; background: #000; padding: 5px; display: grid; grid-template-columns: repeat(7, 1fr); align-content: start; gap: 4px; }
+        .vela-hist-inf { height: 35px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; border: 2px solid transparent; }
+        .borda-padrao { border-color: white !important; }
+        .vela-green { border-color: #00ff00 !important; }
+        .vela-gale { border-color: #f1c40f !important; }
+        .vela-red { border-color: #ff0000 !important; }
+    </style>
+</head>
+<body onload="carregarTudo()">
+
+<div class="topo-info">
+    <div class="placar-geral">
+        <div class="placar-g-geral">G: <span id="count-g-geral">0</span></div>
+        <div class="placar-r-geral">R: <span id="count-r-geral">0</span></div>
+    </div>
+    <div class="cronometro-box">
+        <span onclick="toggleCrono()" ondblclick="resetCrono()" id="btn-crono" style="cursor:pointer">▶️</span>
+        <span id="display-crono">00:00:00</span>
+    </div>
+</div>
+
+<div class="calculadora">
+    <div id="tab-calc" class="tab-content active">
+        <div class="painel-financeiro">
+            <div class="fin-item"><span class="fin-label">BANCA</span><span class="fin-valor" id="banca-val">0.00</span></div>
+            <div class="fin-item"><span class="fin-label">APOSTA</span><span class="fin-valor" id="aposta-val">0.00</span></div>
+            <button onclick="abrirConfig()" style="background:none; border:none; cursor:pointer; font-size: 1.2rem;">⚙️</button>
+        </div>
+
+        <div class="grade" id="grade"></div>
+
+        <div class="tendencia-box" id="tendencia-visual">
+            <div><span class="tend-label">TENDÊNCIA:</span><br><span class="tend-status" id="tend-txt">AGUARDANDO...</span></div>
+            <div style="text-align: right;"><span class="tend-label">FORÇA G:</span><br><span id="tend-forca" style="font-weight: bold; color: var(--cor-verde);">0%</span></div>
+        </div>
+
+        <div class="painel-status">
+            <span id="status-display">ANALISANDO...</span>
+            <div id="lista-ativa"></div>
+        </div>
+
+        <div style="display: flex; gap: 5px; margin-bottom: 5px;">
+            <div class="visor" id="visor-val" style="flex: 1; margin-bottom: 0;">0.00</div>
+            <div id="msg-analisador-azul" style="flex: 2.5; background: #0000ff; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; text-align: center; padding: 5px;">
+                AGUARDANDO DADOS...
+            </div>
+        </div>
+
+        <div class="teclado-grid">
+            <button class="btn-n" onclick="add('7')">7</button>
+            <button class="btn-n" onclick="add('8')">8</button>
+            <button class="btn-n" onclick="add('9')">9</button>
+            <button class="btn-acao btn-grade-inf" onclick="switchTab('grade-inf')">VISOR INF</button>
+            <button class="btn-n" onclick="add('4')">4</button>
+            <button class="btn-n" onclick="add('5')">5</button>
+            <button class="btn-n" onclick="add('6')">6</button>
+            <button class="btn-acao btn-analisador" onclick="switchTab('analise')">ANALISE</button>
+            <button class="btn-n" onclick="add('1')">1</button>
+            <button class="btn-n" onclick="add('2')">2</button>
+            <button class="btn-n" onclick="add('3')">3</button>
+            <button class="btn-acao btn-entrar" onclick="confirmar()">ENTRAR</button>
+            <button class="btn-c" onclick="limpar()">C</button>
+            <button class="btn-n" onclick="add('0')">0</button>
+            <button class="btn-n" onclick="add('.')">.</button>
+            <button class="btn-acao btn-historico-full" onclick="switchTab('hist')">VER HISTÓRICO DE GREENS</button>
+        </div>
+    </div>
+
+    <div id="tab-grade-inf" class="tab-content">
+        <button class="btn-voltar" onclick="switchTab('calc')">⬅ VOLTAR PARA CALCULADORA</button>
+        <div class="area-grade-infinita" id="grade-completa-infinita"></div>
+    </div>
+
+    <div id="tab-hist" class="tab-content">
+        <button class="btn-voltar" onclick="switchTab('calc')">⬅ VOLTAR</button>
+        <div class="grid-historico" id="lista-greens-layout"></div>
+    </div>
+
+    <div id="tab-analise" class="tab-content">
+        <button class="btn-voltar" onclick="switchTab('calc')">⬅ VOLTAR</button>
+        <div id="sugestao-final" class="sugestao-banner">AGUARDANDO DADOS...</div>
+    </div>
+
+    <div id="modal-config">
+        <h4 style="text-align:center">Ajustes de Padrões</h4>
+        <input type="number" id="cfg-banca" class="input-config" placeholder="Banca">
+        <input type="number" id="cfg-aposta" class="input-config" placeholder="Aposta">
+        <div style="display: flex; gap: 5px;">
+            <input type="text" id="novo-p-input" class="input-config" placeholder="Ex: PPG">
+            <button onclick="salvarNovoPadrao()" style="padding:8px; background:var(--cor-verde); border:none; color:white; border-radius:6px;">+</button>
+        </div>
+        <div id="lista-config" style="flex:1; overflow-y:auto; margin-top: 10px;"></div>
+        <button onclick="fecharConfig()" style="padding:10px; background:var(--cor-vermelha); color:white; border:none; border-radius:6px; margin-top:5px;">SALVAR E FECHAR</button>
+    </div>
+</div>
+
+<script>
+    const TELEGRAM_TOKEN = "8427077212:AAEiL_3_D_-fukuaR95V3FqoYYyHvdCHmEI";
+    const TELEGRAM_CHAT_ID = "-1003355965894";
+
+    let historico = [], digitacao = "", sinalAtivo = false, padraoDetectadoIdx = -1, meusPadroes = [], bancaAtual = 100.00, valorApostaOriginal = 2.00, galeAtual = 0;
+    let historicoGreens = [], tendenciaGlobal = "ESTÁVEL", totalGreenGeral = 0, totalRedGeral = 0, tempoSeg = 0, cronoRodando = false, cronoInterval = null;
+
+    function enviarTelegram(texto) {
+        const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+        const dados = {
+            chat_id: TELEGRAM_CHAT_ID,
+            text: texto,
+            parse_mode: "Markdown"
+        };
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dados)
+        }).catch(err => console.error("Erro Telegram:", err));
+    }
+
+    function toggleCrono() {
+        if(!cronoRodando) {
+            cronoRodando = true; document.getElementById('btn-crono').innerText = "⏸️";
+            cronoInterval = setInterval(() => {
+                tempoSeg++;
+                let h = Math.floor(tempoSeg / 3600).toString().padStart(2, '0');
+                let m = Math.floor((tempoSeg % 3600) / 60).toString().padStart(2, '0');
+                let s = (tempoSeg % 60).toString().padStart(2, '0');
+                document.getElementById('display-crono').innerText = `${h}:${m}:${s}`;
+            }, 1000);
+        } else {
+            cronoRodando = false; document.getElementById('btn-crono').innerText = "▶️";
+            clearInterval(cronoInterval);
+        }
+    }
+
+    function resetCrono() {
+        clearInterval(cronoInterval); cronoRodando = false; tempoSeg = 0;
+        document.getElementById('display-crono').innerText = "00:00:00";
+        document.getElementById('btn-crono').innerText = "▶️";
+    }
+
+    function carregarTudo() {
+        const grade = document.getElementById('grade'); grade.innerHTML = '';
+        for(let i=0; i<21; i++) { grade.innerHTML += `<div class="vela" id="v${i}"></div>`; }
+        const s = localStorage.getItem('aviator_padroes_v3'), c = localStorage.getItem('aviator_financeiro');
+        if(s) { meusPadroes = JSON.parse(s); } 
+        else { meusPadroes = [{p: "PPG", w: 0, r: 0, ciclo: 0}]; }
+        if(c) { const f = JSON.parse(c); bancaAtual = f.banca; valorApostaOriginal = f.aposta; }
+        atualizarFinanceiro(); atualizarPainelPrincipal(); renderGrade();
+    }
+
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById('tab-' + tab).classList.add('active');
+        if(tab === 'hist') renderHistorialVisual();
+        if(tab === 'grade-inf') renderGradeInfinita();
+        if(tab === 'analise') processarInteligencia();
+    }
+
+    function add(n) { if(digitacao.length < 5) { digitacao += n; document.getElementById('visor-val').innerText = digitacao; } }
+    function limpar() { digitacao = ""; document.getElementById('visor-val').innerText = "0.00"; }
+
+    function confirmar() {
+        if(!digitacao || digitacao === ".") return;
+        
+        let v;
+        if (digitacao.length === 3 && !digitacao.includes('.')) {
+            v = parseFloat(digitacao) / 100;
+        } else {
+            v = parseFloat(digitacao);
+        }
+
+        const t = v >= 2.00 ? 'G' : 'P';
+        let cl = v < 2.00 ? 'v-azul' : (v < 10.00 ? 'v-roxo' : 'v-rosa');
+        
+        let statusVela = 'normal';
+        if(sinalAtivo) {
+            if(v >= 1.50) statusVela = 'green';
+            else if(galeAtual < 2) statusVela = 'gale';
+            else statusVela = 'red';
+        }
+
+        historico.unshift({v: v.toFixed(2), t: t, c: cl, forca: document.getElementById('tend-forca').innerText, tend: tendenciaGlobal, status: statusVela, isPadrao: false});
+        if(historico.length > 200) historico.pop();
+
+        if(sinalAtivo) processarResultado(v);
+        else verificarSeHaSinal();
+
+        processarInteligencia(); limpar(); renderGrade(); atualizarPainelPrincipal(); atualizarAnaliseTendencia(); salvarNaMemoria();
+    }
+
+    function verificarSeHaSinal() {
+        const seq = historico.map(h => h.t).join('');
+        let achou = false;
+        meusPadroes.forEach((item, index) => {
+            if(seq.startsWith(item.p)) { 
+                item.ciclo++; achou = true; sinalAtivo = true; padraoDetectadoIdx = index;
+                for(let i=0; i < item.p.length; i++) { if(historico[i]) historico[i].isPadrao = true; }
+                
+                efetuarSaidaBanca(valorApostaOriginal, "amarelo");
+                document.getElementById('status-display').innerText = "ENTRADA ATIVA!";
+                document.getElementById('status-display').style.color = "var(--cor-alerta)";
+                
+                const ultimaVelaDigitada = historico[0] ? historico[0].v : "1.10";
+                
+                // Mensagem 1: Envia o Sinal Inicial de Entrada
+                const textoSinal = `🚀 *Novo Sinal - Aviator  ⭐
+EstrelaBet* 🚀\n\n` +
+                                   `📊 Estratégia: Buscar 1.50X\n` +
+                                   `🔥 Padrão de vela formado\n` +
+                                   `🎯 Entrada confirmada\n` +
+                                   `👉 Entrar depois da vela: ${ultimaVelaDigitada}X\n\n` +
+                                   `💰 Valor da stake: ${valorApostaOriginal.toFixed(2).replace('.', ',')}\n` +
+                                   `🖐 Saída em: 1.50x\n\n` +
+                                   `⚠️ STATUS: AGUARDANDO RESULTADO...`;
+                
+                enviarTelegram(textoSinal);
+            }
+        });
+        if(!achou) { padraoDetectadoIdx = -1; document.getElementById('status-display').innerText = "ANALISANDO..."; document.getElementById('status-display').style.color = "var(--cor-verde)"; }
+    }
+
+    function efetuarSaidaBanca(valor, cor) {
+        bancaAtual -= valor;
+        const b = document.getElementById('banca-val'), a = document.getElementById('aposta-val');
+        a.innerText = `R$ ${valor.toFixed(2)}`;
+        if(cor === "amarelo") { b.classList.add('texto-amarelo'); a.classList.add('texto-amarelo'); }
+        setTimeout(() => { b.classList.remove('texto-amarelo'); }, 1000);
+    }
+
+    function galeTexto(n) {
+        if (n === 1) return "1º";
+        if (n === 2) return "2º";
+        if (n === 3) return "3º";
+        return n + "º";
+    }
+
+    function processarResultado(v) {
+        const status = document.getElementById('status-display'), padrao = meusPadroes[padraoDetectadoIdx];
+        const apostaMomento = valorApostaOriginal * Math.pow(2, galeAtual);
+        const b = document.getElementById('banca-val'), a = document.getElementById('aposta-val');
+        const ultimaVelaDigitada = historico[0] ? historico[0].v : "1.10";
+
+        if(v >= 1.50) {
+            bancaAtual += (apostaMomento * 1.5); padrao.w++; totalGreenGeral++;
+            if(padrao.ciclo >= 4) padrao.ciclo = 0;
+            salvarGreenNoHistorico(); sinalAtivo = false; galeAtual = 0;
+            status.innerText = "GREEN! ✅"; status.style.color = "var(--cor-verde)";
+            b.classList.add('brilho-verde'); a.classList.add('brilho-verde');
+            
+            // Mensagem Separada para o Green
+            const textoGreen = `✅ *GREEN CONFIRMADO!* ✅\n\n` +
+                               `🎯 Vela Batida: ${ultimaVelaDigitada}X\n` +
+                               `💰 Lucro garantido no alvo de 1.50x!`;
+            
+            enviarTelegram(textoGreen);
+        } else {
+            if(galeAtual < 2) { 
+                galeAtual++; 
+                const proximaAposta = valorApostaOriginal * Math.pow(2, galeAtual);
+                efetuarSaidaBanca(proximaAposta, "amarelo");
+                status.innerText = `🚨 GALE ${galeAtual}`; status.style.color = "var(--cor-vermelha)"; 
+                
+                // Mensagem Separada para cada Gale
+                const textoGale = `🔄 *ATENÇÃO: ENTRAR NO ${galeTexto(galeAtual)} MARTINGALE* 🔄\n\n` +
+                                  `📊 Estratégia: Buscar 1.50X\n` +
+                                  `👉 Após a vela: ${ultimaVelaDigitada}X\n` +
+                                  `💰 Nova Stake: ${proximaAposta.toFixed(2).replace('.', ',')}\n` +
+                                  `⚠️ Vamos para o ${galeTexto(galeAtual)} Gale!`;
+                
+                enviarTelegram(textoGale);
+            } else {
+                padrao.r++; totalRedGeral++; if(padrao.ciclo >= 4) padrao.ciclo = 0;
+                sinalAtivo = false; galeAtual = 0; status.innerText = "RED ❌";
+                status.style.color = "var(--cor-vermelha)";
+                b.classList.add('brilho-vermelho'); a.classList.add('brilho-vermelho');
+                
+                // Mensagem Separada para o Red
+                const textoRed = `❌ *RED* ❌\n\n` +
+                                 `🛑 Infelizmente o ciclo esgotou após os Martingales.\n` +
+                                 `🔄 Analisando próximos padrões...`;
+                
+                enviarTelegram(textoRed);
+            }
+        }
+        document.getElementById('count-g-geral').innerText = totalGreenGeral;
+        document.getElementById('count-r-geral').innerText = totalRedGeral;
+        setTimeout(() => { 
+            b.classList.remove('brilho-verde', 'brilho-vermelho'); 
+            a.classList.remove('brilho-verde', 'brilho-vermelho', 'texto-amarelo');
+            if(!sinalAtivo) { status.innerText = "ANALISANDO..."; status.style.color = "var(--cor-verde)"; a.innerText = `R$ ${valorApostaOriginal.toFixed(2)}`; }
+        }, 3000);
+    }
+
+    function atualizarPainelPrincipal() {
+        const l = document.getElementById('lista-ativa'); l.innerHTML = '';
+        meusPadroes.forEach((item, index) => { 
+            const ativo = (sinalAtivo && index === padraoDetectadoIdx);
+            const isPerigo = item.ciclo >= 4;
+            l.innerHTML += `<div class="padrao-linha ${ativo ? 'destaque-linha' : ''}">
+                <div style="display:flex; align-items:center;">${fb(item.p)}<span class="ciclo-badge ${isPerigo ? 'ciclo-perigo' : ''}">${item.ciclo}/4</span></div>
+                <div style="font-size:0.7rem;">W:${item.w} R:${item.r}</div>
+            </div>`; 
+        });
+        document.getElementById('banca-val').innerText = `R$ ${bancaAtual.toFixed(2)}`;
+    }
+
+    function processarInteligencia() {
+        if (historico.length < 1) return;
+        const ultimas10 = historico.slice(0, 10), total = ultimas10.length;
+        const v150 = Math.round((ultimas10.filter(h => parseFloat(h.v) >= 1.50).length / total) * 100);
+        const v200 = Math.round((ultimas10.filter(h => parseFloat(h.v) >= 2.00).length / total) * 100);
+        let sugestao = "AGUARDANDO DADOS...", corSugestao = "#222";
+        if (v200 >= 60) { sugestao = "ALTA PROBABILIDADE > 2.00x"; corSugestao = "var(--cor-verde)"; } 
+        else if (v150 >= 70) { sugestao = "MERCADO ESTÁVEL (BUSQUE 1.50x)"; corSugestao = "var(--aviator-azul)"; } 
+        else if (v200 <= 30) { sugestao = "CUIDADO: MERCADO EM QUEDA"; corSugestao = "var(--cor-vermelha)"; }
+        document.getElementById('msg-analisador-azul').innerText = sugestao;
+        document.getElementById('tab-analise').innerHTML = `<button class="btn-voltar" onclick="switchTab('calc')">⬅ VOLTAR</button>
+            <div class="sugestao-banner" style="background: ${corSugestao}">${sugestao}</div>`;
+    }
+
+    function renderGradeInfinita() {
+        const container = document.getElementById('grade-completa-infinita'); container.innerHTML = '';
+        historico.forEach(item => {
+            let classeExtra = '';
+            if(item.isPadrao) classeExtra = 'borda-padrao';
+            if(item.status === 'green') classeExtra = 'vela-green';
+            if(item.status === 'gale') classeExtra = 'vela-gale';
+            if(item.status === 'red') classeExtra = 'vela-red';
+            container.innerHTML += `<div class="vela-hist-inf ${item.c} ${classeExtra}">${item.v}</div>`;
+        });
+    }
+
+    function fb(t) { return t.split('').map(l => `<span class="balao-${l.toLowerCase()}">${l}</span>`).join(''); }
+    function salvarNaMemoria() { localStorage.setItem('aviator_padroes_v3', JSON.stringify(meusPadroes)); localStorage.setItem('aviator_financeiro', JSON.stringify({banca: bancaAtual, aposta: valorApostaOriginal})); }
+    function renderGrade() { for(let i=0; i<21; i++) { let el = document.getElementById('v' + i); if(historico[i]) { el.innerText = historico[i].v; el.className = 'vela ' + historico[i].c; if(sinalAtivo && i < meusPadroes[padraoDetectadoIdx]?.p.length) el.classList.add('brilho-ativo'); } else { el.innerText = ''; el.className = 'vela'; } } }
+    function atualizarFinanceiro() { document.getElementById('banca-val').innerText = `R$ ${bancaAtual.toFixed(2)}`; document.getElementById('aposta-val').innerText = `R$ ${valorApostaOriginal.toFixed(2)}`; }
+    function abrirConfig() { document.getElementById('modal-config').style.display = 'flex'; renderListaNoModal(); }
+    function fecharConfig() { bancaAtual = parseFloat(document.getElementById('cfg-banca').value) || bancaAtual; valorApostaOriginal = parseFloat(document.getElementById('cfg-aposta').value) || valorApostaOriginal; document.getElementById('modal-config').style.display = 'none'; atualizarFinanceiro(); salvarNaMemoria(); }
+    function renderListaNoModal() { const l = document.getElementById('lista-config'); l.innerHTML = ''; meusPadroes.forEach((item, index) => { l.innerHTML += `<div style="display:flex; justify-content:space-between; background:#222; padding:6px; margin-top:4px; border-radius:4px;"><div>${fb(item.p)}</div><button onclick="remover(${index})" style="color:red; background:none; border:none;">X</button></div>`; }); }
+    function salvarNovoPadrao() { const p = document.getElementById('novo-p-input').value.toUpperCase().replace(/[^PG]/g, ''); if(p) { meusPadroes.push({p: p, w: 0, r: 0, ciclo: 0}); document.getElementById('novo-p-input').value = ''; renderListaNoModal(); } }
+    function remover(idx) { meusPadroes.splice(idx, 1); renderListaNoModal(); }
+    function salvarGreenNoHistorico() { if(padraoDetectadoIdx === -1) return; const snap = historico.slice(0, meusPadroes[padraoDetectadoIdx].p.length + 1).map(h => ({v: h.v, f: h.forca, t: h.t})); historicoGreens.unshift(snap); if(historicoGreens.length > 15) historicoGreens.pop(); }
+    function renderHistorialVisual() { const c = document.getElementById('lista-greens-layout'); c.innerHTML = ''; historicoGreens.forEach(linha => { let h = `<div class="linha-green">`; linha.forEach((item, idx) => { const alta = parseFloat(item.v) >= 2.00; h += `<div class="card-vela ${alta ? 'surf-alta' : 'surf-baixa'} ${idx === 0 ? 'green-hit' : ''}"><div class="valor-vela">${item.v}</div><div class="forca-g-badge ${alta ? 'badge-alta' : 'badge-baixa'}">${item.f}</div></div>`; }); h += `</div>`; c.innerHTML += h; }); }
+    function atualizarAnaliseTendencia() { if(historico.length < 3) return; const u = historico.slice(0, 10).map(h => h.t); let gs = u.filter(x => x === 'G').length; document.getElementById('tend-txt').innerText = u[0]==='G' && u[1]==='G' ? "SURF ALTA" : (u[0]==='P' && u[1]==='P' ? "SURF BAIXA" : "XADREZ"); document.getElementById('tend-forca').innerText = Math.round((gs / u.length) * 100) + "%"; }
+</script>
+</body>
+</html>

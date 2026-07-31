@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisador Pro - Live HT/FT</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 12px; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding-bottom: 60px; }
+        h2 { text-align: center; color: #1e3d59; margin-bottom: 15px; font-size: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* Abas de Navegação */
+        .tabs { display: flex; gap: 5px; margin-bottom: 15px; background: #e4e9ed; padding: 4px; border-radius: 6px; }
+        .tab-btn { flex: 1; padding: 8px; border: none; background: transparent; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 9px; color: #555; }
+        .tab-btn.active { background: #fff; color: #1e3d59; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .team-box { border: 1px solid #ddd; padding: 10px; border-radius: 6px; background: #fafafa; text-align: center; position: relative; }
+        .team-box.home { border-top: 4px solid #007bff; }
+        .team-box.away { border-top: 4px solid #dc3545; }
+        .team-title { font-weight: bold; font-size: 9px; margin-bottom: 8px; color: #444; }
+        .inline-fields { display: flex; justify-content: center; gap: 6px; margin-bottom: 8px; }
+        .field-unit { flex: 1; }
+        label { display: block; font-size: 11px; font-weight: bold; margin-bottom: 3px; color: #555; }
+        .label-header { font-size: 11px; color: #777; font-weight: bold; margin-bottom: 2px; }
+        input { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 15px; text-align: center; }
+        input.uppercase { text-transform: uppercase; }
+        .global-fields { background: #f0f4f8; padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #dcdcdc; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        button { color: white; padding: 12px; border: none; border-radius: 5px; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        .btn-calc { background-color: #17b978; }
+        .btn-calc:hover { background-color: #139a63; }
+        .btn-clear { background-color: #6c757d; }
+        .btn-clear:hover { background-color: #5a6268; }
+        .btn-save { background-color: #007bff; grid-column: span 2; }
+        .btn-save:hover { background-color: #0056b3; }
+        .btn-register-teams { background-color: #17a2b8; font-size: 12px; padding: 8px; width: 100%; margin-bottom: 10px; border-radius: 4px; }
+        .btn-register-teams:hover { background-color: #138496; }
+
+        /* Autocomplete */
+        .autocomplete-items { position: absolute; border: 1px solid #d4d4d4; border-bottom: none; border-top: none; z-index: 99; top: 100%; left: 0; right: 0; }
+        .autocomplete-items div { padding: 8px; cursor: pointer; background-color: #fff; border-bottom: 1px solid #d4d4d4; text-align: left; font-size: 12px; }
+        .autocomplete-items div:hover { background-color: #e9e9e9; }
+
+        /* Visor de Resultados no Topo */
+        .result-box { margin-bottom: 15px; padding: 12px; border-radius: 5px; display: none; text-align: center; border: 1px solid #ccc; background: #e9ecef; color: #495057; }
+        .high { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .medium { background-color: #fff3cd; color: #856404; border-color: #ffeeba; }
+        .low { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .panel-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+        .panel { background: rgba(255,255,255,0.7); padding: 8px; border-radius: 4px; font-size: 13px; font-weight: bold; border: 1px solid rgba(0,0,0,0.05); }
+        .panel-title { font-size: 11px; color: #444; text-transform: uppercase; margin-bottom: 2px; border-bottom: 1px dashed rgba(0,0,0,0.1); }
+        .score-text { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
+        .btn-telegram { background-color: #0088cc; font-size: 13px; padding: 8px; width: 100%; margin-top: 10px; border-radius: 4px; }
+        .btn-telegram:hover { background-color: #006699; }
+
+        /* Estilização do Histórico */
+        .date-group { margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; background: #fafafa; }
+        .date-header { background: #e9ecef; padding: 10px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #333; }
+        .date-header:hover { background: #dde2e6; }
+        .date-items { display: none; padding: 10px; border-top: 1px solid #ddd; background: #fff; }
+        .date-items.open { display: block; }
+        .history-card { padding: 10px; margin-bottom: 8px; border-radius: 4px; border: 1px solid #e0e0e0; background: #f8f9fa; font-size: 12px; }
+        .history-card.green { border-left: 5px solid #28a745; background: #e8f5e9; }
+        .history-card.red { border-left: 5px solid #dc3545; background: #ffebee; }
+        .history-card-header { font-weight: bold; font-size: 13px; margin-bottom: 4px; color: #1e3d59; display: flex; justify-content: space-between; align-items: center; }
+        .history-actions { display: flex; gap: 5px; margin-top: 8px; align-items: center; }
+        .btn-status-green { background: #28a745; color: white; border: none; padding: 5px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; font-weight: bold; }
+        .btn-status-red { background: #dc3545; color: white; border: none; padding: 5px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; font-weight: bold; }
+        .btn-delete { background: #6c757d; color: white; border: none; padding: 5px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; }
+        .input-placar-final { width: 50px !important; padding: 3px !important; font-size: 12px !important; display: inline-block; text-align: center; }
+
+        /* Gerenciamento de Times */
+        .team-list-container { display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; }
+        .team-item-row { display: flex; justify-content: space-between; align-items: center; background: #f9f9f9; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3>Kcom RoBet Gol</h3>
+
+    <!-- Abas -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('calcTab', this)">Calculadora</button>
+        <button class="tab-btn" onclick="switchTab('histTab', this); carregarHistorico();">Histórico</button>
+        <button class="tab-btn" onclick="switchTab('teamsTab', this); carregarTimesRegistrados();">Times Registrados</button>
+    </div>
+
+    <!-- Aba Calculadora -->
+    <div id="calcTab" class="tab-content active">
+        
+        <!-- VISOR DE RESULTADO NA PARTE SUPERIOR -->
+        <div id="resultado" class="result-box">
+            <div id="scoreText" class="score-text"></div>
+            <div id="veredicto" style="font-size: 13px; margin-bottom: 10px;"></div>
+            
+            <div class="panel-group">
+                <div class="panel">
+                    <div class="panel-title">Projeção HT (1ºT)</div>
+                    <div id="projHT">--</div>
+                </div>
+                <div class="panel">
+                    <div class="panel-title">Projeção FT (Jogo Todo)</div>
+                    <div id="projFT">--</div>
+                </div>
+            </div>
+            <button class="btn-telegram" onclick="enviarTelegram()">📤 Enviar Sinal para o Telegram</button>
+        </div>
+
+        <!-- Tempo e Placar -->
+        <div class="global-fields grid-2">
+            <div class="field-group">
+                <label>⏱️ Minuto Atual:</label>
+                <input type="number" id="minutoAtual" min="1" max="120" value="" placeholder="Ex: 15" oninput="autoJump(this, 'golsCasa')">
+            </div>
+            <div class="field-group">
+                <label>⚽ Placar Atual:</label>
+                <div style="display: flex; gap: 4px;">
+                    <input type="number" id="golsCasa" placeholder="C" oninput="autoJump(this, 'golsVisitante')">
+                    <span style="align-self: center; font-weight: bold; font-size:14px;">x</span>
+                    <input type="number" id="golsVisitante" placeholder="V" oninput="autoJump(this, 'nomeCasa')">
+                </div>
+            </div>
+        </div>
+
+        <!-- Nomes dos Times e Layout Horizontal -->
+        <div class="grid-2">
+            <!-- Mandante -->
+            <div class="team-box home">
+                <div class="team-title">MANDANTE 🏡</div>
+                <div class="field-group" style="margin-bottom: 8px; position: relative;">
+                    <label></label>
+                    <input type="text" id="nomeCasa" class="uppercase" placeholder="Ex: FLAMENGO" style="text-align: center;" oninput="this.value = this.value.toUpperCase(); filtrarTimes(this, 'sugestoesCasa')" onkeydown="if(event.key==='Enter'){document.getElementById('nomeVisitante').focus();}">
+                    <div id="sugestoesCasa" class="autocomplete-items"></div>
+                </div>
+                <div class="field-group" style="margin: 8px 0;">
+                    <label>⚔️ Ataques Perigosos:</label>
+                    <input type="number" id="apCasa" value="" oninput="autoJump(this, 'cfCasa')" onfocus="scrollToField(this)">
+                </div>
+                <div class="label-header">Fora / Alvo</div>
+                <div class="inline-fields">
+                    <div class="field-unit"><input type="number" id="cfCasa" value="" placeholder="Fora" oninput="autoJump(this, 'caCasa')" onfocus="scrollToField(this)"></div>
+                    <div class="field-unit"><input type="number" id="caCasa" value="" placeholder="Alvo" oninput="autoJump(this, 'nomeVisitante')" onfocus="scrollToField(this)"></div>
+                </div>
+            </div>
+
+            <!-- Visitante -->
+            <div class="team-box away">
+                <div class="team-title">VISITANTE ✈️</div>
+                <div class="field-group" style="margin-bottom: 8px; position: relative;">
+                    <label></label>
+                    <input type="text" id="nomeVisitante" class="uppercase" placeholder="Ex: PALMEIRAS" style="text-align: center;" oninput="this.value = this.value.toUpperCase(); filtrarTimes(this, 'sugestoesVisitante')" onkeydown="if(event.key==='Enter'){document.getElementById('apVisitante').focus();}">
+                    <div id="sugestoesVisitante" class="autocomplete-items"></div>
+                </div>
+                <div class="field-group" style="margin: 8px 0;">
+                    <label>⚔️ Ataques Perigosos:</label>
+                    <input type="number" id="apVisitante" value="" oninput="autoJump(this, 'cfVisitante')" onfocus="scrollToField(this)">
+                </div>
+                <div class="label-header">Fora / Alvo</div>
+                <div class="inline-fields">
+                    <div class="field-unit"><input type="number" id="cfVisitante" value="" placeholder="Fora" oninput="autoJump(this, 'caVisitante')" onfocus="scrollToField(this)"></div>
+                    <div class="field-unit"><input type="number" id="caVisitante" value="" placeholder="Alvo" oninput="autoJump(this, 'escanteios')" onfocus="scrollToField(this)"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botão único para registrar ambos os times -->
+        <button class="btn-register-teams" onclick="registrarAmbosOsTimes()">💾 Registrar Mandante e Visitante</button>
+
+        <!-- Escanteios Totais -->
+        <div class="global-fields">
+            <div class="field-group">
+                <label>🚩 Escanteios Totais (Jogo):</label>
+                <input type="number" id="escanteios" value="0" onfocus="scrollToField(this)">
+            </div>
+        </div>
+
+        <!-- Botões -->
+        <div class="btn-group">
+            <button class="btn-calc" onclick="calcularPressao()">Analisar Projeções</button>
+            <button class="btn-clear" onclick="limparCampos()">Limpar</button>
+            <button class="btn-save" onclick="salvarAnalise()">Salvar Análise</button>
+        </div>
+    </div>
+
+    <!-- Aba Histórico -->
+    <div id="histTab" class="tab-content">
+        <h3 style="font-size: 15px; color: #1e3d59; text-align: center; margin-top: 0;">Histórico por Data</h3>
+        <div id="listaHistorico">
+            <p style="text-align: center; color: #777; font-size: 13px;">Nenhuma análise salva ainda.</p>
+        </div>
+    </div>
+
+    <!-- Aba Times Registrados -->
+    <div id="teamsTab" class="tab-content">
+        <h3 style="font-size: 15px; color: #1e3d59; text-align: center; margin-top: 0;">Times Registrados</h3>
+        <div style="display: flex; gap: 5px; margin-bottom: 12px;">
+            <input type="text" id="novoTimeManual" class="uppercase" placeholder="DIGITE O NOME DO TIME" oninput="this.value = this.value.toUpperCase()">
+            <button onclick="adicionarTimeManual()" style="background: #007bff; padding: 6px 12px; font-size: 13px; border-radius: 4px;">Adicionar</button>
+        </div>
+        <div id="listaTimesRegistrados" class="team-list-container">
+            <p style="text-align: center; color: #777; font-size: 13px;">Nenhum time registrado.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+const TELEGRAM_BOT_TOKEN = "8427077212:AAEiL_3_D_-fukuaR95V3FqoYYyHvdCHmEI";
+const TELEGRAM_CHAT_ID = "-1003355965894";
+
+let dadosUltimaAnalise = null;
+let datasAbertasNoHistorico = {}; // Mantém controle das datas abertas
+
+function autoJump(currentInput, nextInputId) {
+    if (currentInput.value.length >= 2 || (currentInput.id.startsWith('gols') && currentInput.value.length >= 1)) {
+        const nextInput = document.getElementById(nextInputId);
+        if (nextInput) {
+            nextInput.focus();
+            nextInput.select();
+        }
+    }
+}
+
+function scrollToField(inputElement) {
+    setTimeout(() => {
+        inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 250);
+}
+
+function switchTab(tabId, btnElement) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById(tabId).classList.add('active');
+    btnElement.classList.add('active');
+}
+
+function limparCampos() {
+    document.getElementById('minutoAtual').value = "";
+    document.getElementById('golsCasa').value = "";
+    document.getElementById('golsVisitante').value = "";
+    document.getElementById('nomeCasa').value = "";
+    document.getElementById('nomeVisitante').value = "";
+    document.getElementById('apCasa').value = "";
+    document.getElementById('apVisitante').value = "";
+    document.getElementById('caCasa').value = "";
+    document.getElementById('caVisitante').value = "";
+    document.getElementById('cfCasa').value = "";
+    document.getElementById('cfVisitante').value = "";
+    document.getElementById('escanteios').value = "0";
+    document.getElementById('resultado').style.display = 'none';
+    dadosUltimaAnalise = null;
+}
+
+// Funções de Times Registrados e Autocomplete
+function getTimesRegistrados() {
+    return JSON.parse(localStorage.getItem('timesRegistrados')) || [];
+}
+
+function salvarTimesRegistrados(times) {
+    localStorage.setItem('timesRegistrados', JSON.stringify(times));
+}
+
+function registrarAmbosOsTimes() {
+    let nomeC = document.getElementById('nomeCasa').value.trim().toUpperCase();
+    let nomeV = document.getElementById('nomeVisitante').value.trim().toUpperCase();
+    
+    if (!nomeC && !nomeV) {
+        alert("Preencha pelo menos o nome de um dos times!");
+        return;
+    }
+
+    let times = getTimesRegistrados();
+    let novosRegistros = 0;
+
+    [nomeC, nomeV].forEach(nome => {
+        if (nome && !times.includes(nome)) {
+            times.push(nome);
+            novosRegistros++;
+        }
+    });
+
+    if (novosRegistros > 0) {
+        times.sort();
+        salvarTimesRegistrados(times);
+        alert(`${novosRegistros} time(s) registrado(s) com sucesso!`);
+    } else {
+        alert("Os times informados já estão registrados.");
+    }
+}
+
+function adicionarTimeManual() {
+    let input = document.getElementById('novoTimeManual');
+    let nome = input.value.trim().toUpperCase();
+    if (!nome) return;
+    let times = getTimesRegistrados();
+    if (!times.includes(nome)) {
+        times.push(nome);
+        times.sort();
+        salvarTimesRegistrados(times);
+        input.value = "";
+        carregarTimesRegistrados();
+    } else {
+        alert("Time já cadastrado.");
+    }
+}
+
+function deletarTime(nome) {
+    let times = getTimesRegistrados();
+    times = times.filter(t => t !== nome);
+    salvarTimesRegistrados(times);
+    carregarTimesRegistrados();
+}
+
+function carregarTimesRegistrados() {
+    let times = getTimesRegistrados();
+    let container = document.getElementById('listaTimesRegistrados');
+    container.innerHTML = "";
+
+    if (times.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #777; font-size: 13px;">Nenhum time registrado.</p>';
+        return;
+    }
+
+    times.forEach(time => {
+        let row = document.createElement('div');
+        row.className = 'team-item-row';
+        row.innerHTML = `<span>⚽ ${time}</span> <button class="btn-delete" onclick="deletarTime('${time}')">Excluir</button>`;
+        container.appendChild(row);
+    });
+}
+
+function filtrarTimes(inputElement, sugestoesId) {
+    let val = inputElement.value.toUpperCase();
+    let container = document.getElementById(sugestoesId);
+    container.innerHTML = "";
+    if (!val) return;
+
+    let times = getTimesRegistrados();
+    let matches = times.filter(t => t.includes(val));
+
+    matches.forEach(match => {
+        let div = document.createElement('div');
+        div.innerHTML = match;
+        div.onclick = function() {
+            inputElement.value = match;
+            container.innerHTML = "";
+        };
+        container.appendChild(div);
+    });
+}
+
+document.addEventListener("click", function (e) {
+    if (!e.target.closest('.team-box')) {
+        document.querySelectorAll('.autocomplete-items').forEach(el => el.innerHTML = "");
+    }
+});
+
+function calcularPressao() {
+    let min = parseFloat(document.getElementById('minutoAtual').value) || 1;
+    let gC = parseInt(document.getElementById('golsCasa').value) || 0;
+    let gV = parseInt(document.getElementById('golsVisitante').value) || 0;
+    let totalGols = gC + gV;
+    
+    let nomeC = document.getElementById('nomeCasa').value.trim() || 'MANDANTE';
+    let nomeV = document.getElementById('nomeVisitante').value.trim() || 'VISITANTE';
+
+    let apC = parseFloat(document.getElementById('apCasa').value) || 0;
+    let apV = parseFloat(document.getElementById('apVisitante').value) || 0;
+    let caC = parseFloat(document.getElementById('caCasa').value) || 0;
+    let caV = parseFloat(document.getElementById('caVisitante').value) || 0;
+    let cfC = parseFloat(document.getElementById('cfCasa').value) || 0;
+    let cfV = parseFloat(document.getElementById('cfVisitante').value) || 0;
+    let esc = parseFloat(document.getElementById('escanteios').value) || 0;
+
+    if(min <= 0) min = 1;
+
+    let mediaApTotal = (apC / min) + (apV / min);
+    let caTotal = caC + caV;
+    let cfTotal = cfC + cfV;
+
+    let score = (caTotal * 3.5) + (cfTotal * 1.5) + (mediaApTotal * 100) + (esc * 0.8);
+
+    let resultadoDiv = document.getElementById('resultado');
+    let scoreText = document.getElementById('scoreText');
+    let veredicto = document.getElementById('veredicto');
+    let projHT = document.getElementById('projHT');
+    let projFT = document.getElementById('projFT');
+
+    resultadoDiv.style.display = 'block';
+
+    let txtProjHT = "";
+    let txtProjFT = "";
+    let statusClass = "";
+
+    if (score >= 120) {
+        resultadoDiv.className = 'result-box high';
+        statusClass = 'high';
+        scoreText.innerHTML = "🔥 JOGO ACELERADO (" + score.toFixed(0) + " pts)";
+        veredicto.innerHTML = "Alto volume de finalizações e ações nas áreas. Ritmo forte para movimentar o placar.";
+    } else if (score >= 60) {
+        resultadoDiv.className = 'result-box medium';
+        statusClass = 'medium';
+        scoreText.innerHTML = "⚡ RITMO MODERADO (" + score.toFixed(0) + " pts)";
+        veredicto.innerHTML = "Presença ofensiva regular, mas as defesas ainda conseguem interceptar as jogadas decisivas.";
+    } else {
+        resultadoDiv.className = 'result-box low';
+        statusClass = 'low';
+        scoreText.innerHTML = "❄️ JOGO TRUNCADO (" + score.toFixed(0) + " pts)";
+        veredicto.innerHTML = "Pouca criação objetiva. Partida concentrada no setor de meio-campo.";
+    }
+
+    let probBase = Math.min(Math.max((score / 1.8), 10), 96);
+    let proximaLinhaHT = (totalGols + 0.5).toFixed(1);
+    let proximaLinhaFT = (totalGols + 0.5).toFixed(1);
+
+    if (min <= 45) {
+        let probHT = Math.round(probBase);
+        let probFT = Math.round(Math.min(probBase * 1.15, 98));
+
+        if (score >= 110) {
+            txtProjHT = `⚽ <strong>${probHT}% (Muito Alto)</strong><br>Tendência Alta: +${proximaLinhaHT} Gols HT`;
+            txtProjFT = `📈 <strong>${probFT}% (Alto)</strong><br>Cenário Aberto: Buscar linhas de Over FT (+${proximaLinhaFT})`;
+        } else if (score >= 60) {
+            txtProjHT = `⏳ <strong>${probHT}% (Moderado)</strong><br>Monitorar: Próximo gol HT (+${proximaLinhaHT})`;
+            txtProjFT = `📊 <strong>${probFT}% (Moderado)</strong><br>Ritmo Controlado: Linhas normais FT (+${proximaLinhaFT})`;
+        } else {
+            txtProjHT = `❌ <strong>${probHT}% (Baixo/Arriscado)</strong><br>Sem Valor: Difícil sair mais gols no HT`;
+            txtProjFT = `📉 <strong>${probFT}% (Baixo)</strong><br>Jogo Amarrado: Cuidado com linhas de Over FT`;
+        }
+    } else {
+        let probFTFinal = Math.round(Math.min(probBase * 1.25, 98));
+        txtProjHT = "🏁 HT Encerrado (Placar parcial: " + totalGols + " gol(s))";
+        
+        if (score >= 180) {
+            txtProjFT = `🔥 <strong>${probFTFinal}% (Muito Alto)</strong><br>Amassando: Buscar +${proximaLinhaFT} Gols FT`;
+        } else if (score >= 100) {
+            txtProjFT = `🎯 <strong>${probFTFinal}% (Moderado/Alto)</strong><br>Linha Limite: +${proximaLinhaFT} Gols FT`;
+        } else {
+            txtProjFT = `❌ <strong>${probFTFinal}% (Muito Arriscado)</strong><br>Sem Força: Risco para +${proximaLinhaFT} FT`;
+        }
+    }
+
+    projHT.innerHTML = txtProjHT;
+    projFT.innerHTML = txtProjFT;
+
+    const agora = new Date();
+    const dataFormatada = agora.toLocaleDateString('pt-BR');
+    const horaFormatada = agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+
+    dadosUltimaAnalise = {
+        id: Date.now(),
+        data: dataFormatada,
+        hora: horaFormatada,
+        mandante: nomeC,
+        visitante: nomeV,
+        golsCasaInicio: gC,
+        golsVisitanteInicio: gV,
+        partida: `${nomeC} ${gC} x ${gV} ${nomeV}`,
+        minuto: min,
+        score: score.toFixed(0),
+        status: statusClass,
+        customStatus: '',
+        placarFinalCasa: '',
+        placarFinalVisitante: '',
+        projHT: txtProjHT.replace(/<[^>]*>/g, ''),
+        projFT: txtProjFT.replace(/<[^>]*>/g, '')
+    };
+
+    resultadoDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function dispararMensagemTelegram(texto) {
+    if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+        alert("Configure o Token e o Chat ID do Telegram no código!");
+        return;
+    }
+    let url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+    let dados = {
+        chat_id: TELEGRAM_CHAT_ID,
+        text: texto,
+        parse_mode: "Markdown"
+    };
+
+    fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dados)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.ok) {
+            alert("Mensagem enviada com sucesso para o Telegram!");
+        } else {
+            alert("Erro ao enviar ao Telegram: " + (data.description || 'Erro desconhecido'));
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Erro de conexão ao enviar para o Telegram.");
+    });
+}
+
+function enviarTelegram() {
+    if (!dadosUltimaAnalise) {
+        alert("Realize uma análise primeiro!");
+        return;
+    }
+    let texto = `📊 *NOVO SINAL - ANÁLISE LIVE HT/FT* 📊\n\n` +
+                `⚽ *Partida:* ${dadosUltimaAnalise.mandante} vs ${dadosUltimaAnalise.visitante}\n` +
+                `⏱️ *Minuto do Sinal:* ${dadosUltimaAnalise.minuto}'\n` +
+                `📌 *Placar no Momento:* ${dadosUltimaAnalise.golsCasaInicio} x ${dadosUltimaAnalise.golsVisitanteInicio}\n` +
+                `🔥 *Score de Pressão:* ${dadosUltimaAnalise.score} pts\n\n` +
+                `🔹 *Projeção HT:* ${dadosUltimaAnalise.projHT}\n` +
+                `🔹 *Projeção FT:* ${dadosUltimaAnalise.projFT}\n\n` +
+                `💡 *Fique atento às oportunidades em campo!*`;
+    
+    dispararMensagemTelegram(texto);
+}
+
+function salvarAnalise() {
+    if (!dadosUltimaAnalise) {
+        alert("Realize uma análise primeiro antes de salvar!");
+        return;
+    }
+
+    let historico = JSON.parse(localStorage.getItem('historicoAnalises')) || [];
+    historico.unshift(dadosUltimaAnalise);
+    localStorage.setItem('historicoAnalises', JSON.stringify(historico));
+
+    alert("Análise salva com sucesso no histórico!");
+    switchTab('histTab', document.querySelectorAll('.tab-btn')[1]);
+    carregarHistorico();
+}
+
+function carregarHistorico() {
+    let historico = JSON.parse(localStorage.getItem('historicoAnalises')) || [];
+    let contenedor = document.getElementById('listaHistorico');
+    contenedor.innerHTML = "";
+
+    if (historico.length === 0) {
+        contenedor.innerHTML = '<p style="text-align: center; color: #777; font-size: 13px;">Nenhuma análise salva ainda.</p>';
+        return;
+    }
+
+    let agrupadoPorData = {};
+    historico.forEach(item => {
+        if (!agrupadoPorData[item.data]) {
+            agrupadoPorData[item.data] = [];
+        }
+        agrupadoPorData[item.data].push(item);
+    });
+
+    for (let data in agrupadoPorData) {
+        let dateGroupDiv = document.createElement('div');
+        dateGroupDiv.className = 'date-group';
+
+        let headerDiv = document.createElement('div');
+        headerDiv.className = 'date-header';
+        let estaAberto = datasAbertasNoHistorico[data] === true;
+        headerDiv.innerHTML = `📅 ${data} (${agrupadoPorData[data].length} análises) <span>${estaAberto ? '▲' : '▼'}</span>`;
+        
+        let itemsDiv = document.createElement('div');
+        itemsDiv.className = 'date-items' + (estaAberto ? ' open' : '');
+
+        headerDiv.onclick = () => {
+            itemsDiv.classList.toggle('open');
+            let abertoAgora = itemsDiv.classList.contains('open');
+            datasAbertasNoHistorico[data] = abertoAgora;
+            headerDiv.querySelector('span').textContent = abertoAgora ? '▲' : '▼';
+        };
+
+        agrupadoPorData[data].forEach(item => {
+            let cardClass = `history-card ${item.status}`;
+            if (item.customStatus === 'GREEN') cardClass += ' green';
+            if (item.customStatus === 'RED') cardClass += ' red';
+
+            let card = document.createElement('div');
+            card.className = cardClass;
+            
+            let placarFinalHtml = `
+                <div style="margin-top: 5px; display: flex; gap: 5px; align-items: center; font-weight: bold;">
+                    <span>Placar Atual:</span>
+                    <input type="number" id="pfCasa_${item.id}" class="input-placar-final" value="${item.placarFinalCasa !== undefined ? item.placarFinalCasa : ''}" placeholder="C">
+                    <span>x</span>
+                    <input type="number" id="pfVis_${item.id}" class="input-placar-final" value="${item.placarFinalVisitante !== undefined ? item.placarFinalVisitante : ''}" placeholder="V">
+                </div>
+            `;
+
+            card.innerHTML = `
+                <div class="history-card-header">
+                    <span>⏰ ${item.hora} - ${item.partida} (${item.minuto}')</span>
+                </div>
+                <div><strong>Score:</strong> ${item.score} pts</div>
+                <div><strong>HT:</strong> ${item.projHT}</div>
+                <div><strong>FT:</strong> ${item.projFT}</div>
+                ${placarFinalHtml}
+                <div class="history-actions">
+                    <button class="btn-status-green" onclick="definirStatusItem(${item.id}, 'GREEN')">GREEN ✅</button>
+                    <button class="btn-status-red" onclick="definirStatusItem(${item.id}, 'RED')">RED ❌</button>
+                    <button class="btn-delete" onclick="deletarItem(${item.id})">Excluir</button>
+                </div>
+            `;
+            itemsDiv.appendChild(card);
+        });
+
+        dateGroupDiv.appendChild(headerDiv);
+        dateGroupDiv.appendChild(itemsDiv);
+        contenedor.appendChild(dateGroupDiv);
+    }
+}
+
+function definirStatusItem(id, status) {
+    let inputCasa = document.getElementById(`pfCasa_${id}`);
+    let inputVis = document.getElementById(`pfVis_${id}`);
+    
+    let pfc = inputCasa ? inputCasa.value.trim() : '';
+    let pfv = inputVis ? inputVis.value.trim() : '';
+
+    if (pfc === '' || pfv === '') {
+        alert("Por favor, preencha o Placar Final antes de registrar o Green ou Red!");
+        return;
+    }
+
+    let historico = JSON.parse(localStorage.getItem('historicoAnalises')) || [];
+    let itemAtualizado = null;
+
+    historico = historico.map(item => {
+        if (item.id === id) {
+            item.customStatus = status;
+            item.placarFinalCasa = pfc;
+            item.placarFinalVisitante = pfv;
+            itemAtualizado = item;
+        }
+        return item;
+    });
+
+    localStorage.setItem('historicoAnalises', JSON.stringify(historico));
+    carregarHistorico();
+
+    // Dispara mensagem detalhada ao clicar em Green ou Red
+    if (itemAtualizado) {
+        let emojiStatus = status === 'GREEN' ? '✅ *GREEN CONFIRMADO* ✅' : '❌ *RED ENCERRADO* ❌';
+        let textoRes = `📢 *ATUALIZAÇÃO DE RESULTADO* 📢\n\n` +
+                       `⚽ *Partida:* ${itemAtualizado.mandante} vs ${itemAtualizado.visitante}\n` +
+                       `⏱️ *Minuto da Análise:* ${itemAtualizado.minuto}'\n` +
+                       `📌 *Placar no Mom. do Sinal:* ${itemAtualizado.golsCasaInicio} x ${itemAtualizado.golsVisitanteInicio}\n` +
+                       `🏁 *Plac. atual/final da part:* ${itemAtualizado.placarFinalCasa} x ${itemAtualizado.placarFinalVisitante}\n\n` +
+                       `🎯 *Status Final:* ${emojiStatus}\n\n` +
+                       `📈 *Analisador Pro Live*`;
+        
+        dispararMensagemTelegram(textoRes);
+    }
+}
+
+function deletarItem(id) {
+    let historico = JSON.parse(localStorage.getItem('historicoAnalises')) || [];
+    historico = historico.filter(item => item.id !== id);
+    localStorage.setItem('historicoAnalises', JSON.stringify(historico));
+    carregarHistorico();
+}
+</script>
+</body>
+</html>

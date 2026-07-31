@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>K.C⚽️M Pro - Desktop & Mobile Dashboard</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #121214;
+            --card: #1e1e24;
+            --input-bg: #2a2a32;
+            --border: #3f3f46;
+            --text: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            width: 100vw;
+            overflow-x: hidden;
+        }
+
+        .desktop-container {
+            display: flex;
+            flex-direction: column;
+            width: 100vw;
+            min-height: 100vh;
+        }
+
+        .brand-panel {
+            position: relative;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            background: #000;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border);
+            gap: 15px;
+        }
+
+        .mascot-img {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .brand-text-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-logo-text {
+            font-size: 1.4em;
+            font-weight: 900;
+            letter-spacing: 1px;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 50%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-sub {
+            font-size: 0.75em;
+            color: #a1a1aa;
+        }
+
+        #termometro-container {
+            width: 100%;
+            margin-bottom: 5px;
+            background: #09090b;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        #term-text {
+            font-size: 0.8em;
+            color: #a1a1aa;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+        #termometro {
+            height: 8px;
+            width: 100%;
+            background: #27272a;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        #term-bar {
+            height: 100%;
+            width: 50%;
+            background: linear-gradient(to right, #ef4444, #f59e0b, #4ade80);
+            transition: width 0.3s ease;
+        }
+
+        .main-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 12px;
+            background: #18181b;
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 350px; 
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            flex-wrap: nowrap;
+            width: 100%;
+        }
+        .tab-btn {
+            flex: 1;
+            text-align: center;
+            background: #27272a;
+            color: #a1a1aa;
+            padding: 12px 2px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.8em;
+            transition: 0.2s;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: flex; flex-direction: column; gap: 12px; }
+
+        .result-box {
+            background: #09090b;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .sub-result { font-size: 0.9em; color: #4ade80; font-weight: bold; }
+        .appm-val { font-size: 0.9em; color: #38bdf8; font-weight: bold; margin-top: 4px; }
+        .conf-val { font-size: 0.8em; color: #a1a1aa; }
+
+        .obs-box {
+            margin-top: 6px;
+            padding: 8px;
+            background: #18181b;
+            border-radius: 8px;
+            border-left: 4px solid #a5b4fc;
+            font-size: 0.8em;
+            color: #e2e8f0;
+            line-height: 1.3;
+        }
+
+        .rastreador-alert {
+            margin-top: 6px;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.8em;
+            background: #18181b;
+            border-left: 4px solid var(--primary);
+        }
+
+        .inputs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .full-width { grid-column: span 2; }
+
+        input, select, textarea, .country-btn {
+            width: 100%;
+            padding: 12px 8px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        #time1, #time2 {
+            text-transform: uppercase;
+        }
+
+        input:focus, textarea:focus, select:focus { border-color: var(--primary); }
+
+        .tempo-selector {
+            display: flex;
+            background: #09090b;
+            padding: 3px;
+            border-radius: 8px;
+            gap: 4px;
+            border: 1px solid var(--border);
+        }
+        .tempo-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #a1a1aa;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+        .tempo-btn.active { background: var(--primary); color: white; }
+
+        .action-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-top: 4px;
+            margin-bottom: 10px; 
+        }
+        .btn-action {
+            padding: 12px 4px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            font-size: 0.85em;
+            transition: opacity 0.2s;
+        }
+        .btn-action:active { opacity: 0.7; }
+
+        .btn-blue { background: #2563eb; }
+        .btn-green { background: #16a34a; }
+        .btn-red { background: #dc2626; }
+        .btn-yellow { background: #ca8a04; }
+        .btn-telegram { background: #0284c7; grid-column: span 4; margin-top: 4px; }
+
+        .country-select-wrapper { position: relative; }
+        .country-dropdown {
+            display: none;
+            position: absolute;
+            top: 105%;
+            left: 0;
+            width: 100%;
+            background: #18181b;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            z-index: 99;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.7);
+        }
+        .country-dropdown.open { display: block; }
+        .country-search { width: 100%; padding: 10px; background: #09090b; border: none; border-bottom: 1px solid var(--border); color: white; text-align: left; }
+        .country-list { max-height: 180px; overflow-y: auto; text-align: left; }
+        .country-item { padding: 10px 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; border-bottom: 1px solid #27272a; }
+        .country-item:hover { background: #27272a; }
+        .flag-img { width: 20px; height: 14px; object-fit: cover; }
+
+        .autocomplete-wrapper { position: relative; width: 100%; }
+        .autocomplete-list {
+            position: absolute;
+            top: 105%;
+            left: 0;
+            right: 0;
+            background: #18181b;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+        .autocomplete-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            font-size: 0.85em;
+            text-align: left;
+            border-bottom: 1px solid #27272a;
+        }
+        .autocomplete-item:hover { background: var(--primary); color: white; }
+
+        .card-stat { background: #09090b; border-radius: 8px; padding: 10px; border: 1px solid var(--border); margin-bottom: 8px; }
+        .item { background: #09090b; padding: 10px; margin: 6px 0; border-radius: 8px; border-left: 4px solid var(--primary); font-size: 0.85em; line-height: 1.4; }
+        .btn-hist { background: transparent; border: none; cursor: pointer; padding: 6px 8px; font-weight: bold; border-radius: 4px; margin-right: 4px; font-size: 0.8em; }
+
+        /* Estilos adicionados para a Sala de Espera */
+        #painelAlertaUrgente {
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            background: #7f1d1d;
+            border: 2px solid #ef4444;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+        .alert-banner {
+            background: #991b1b;
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .alert-banner button {
+            background: #ffffff;
+            color: #000;
+            border: none;
+            padding: 6px 10px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .waiting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #18181b;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            border-left: 4px solid #ca8a04;
+        }
+        .waiting-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .waiting-teams {
+            font-weight: bold;
+            color: #f8fafc;
+            font-size: 0.9em;
+        }
+        .waiting-meta {
+            font-size: 0.75em;
+            color: #a1a1aa;
+        }
+        .waiting-timer {
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #facc15;
+            background: #09090b;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            margin-right: 6px;
+        }
+        .waiting-timer.ready {
+            color: #4ade80;
+            border-color: #4ade80;
+            animation: pulse 1s infinite;
+        }
+        .btn-waiting-delete {
+            background: #7f1d1d;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .btn-clear {
+            background: #7f1d1d;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        @media (min-width: 900px) {
+            .desktop-container {
+                display: grid;
+                grid-template-columns: 1.0fr 0.9fr;
+                height: 100vh;
+            }
+            .main-panel {
+                order: 1;
+                height: 100vh;
+                padding: 30px;
+                padding-bottom: 30px;
+                overflow-y: auto;
+            }
+            .brand-panel {
+                order: 2;
+                height: 100vh;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                padding: 40px;
+                text-align: center;
+                border-bottom: none;
+                border-left: 1px solid var(--border);
+                background: #09090b;
+            }
+            .mascot-img {
+                width: 160px;
+                height: 160px;
+                margin-bottom: 20px;
+            }
+            .brand-text-container {
+                align-items: center;
+            }
+            .brand-logo-text { font-size: 2.6em; }
+            .brand-sub { font-size: 0.95em; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="desktop-container">
+
+    <!-- PAINEL DA MARCA / MASCOTE -->
+    <div class="brand-panel">
+        <img src="https://i.ibb.co/KJsJKv7/IMG-20260719-211202.png" alt="Robot Mascot" class="mascot-img">
+        <div class="brand-text-container">
+            <div class="brand-logo-text">RoBET</div>
+            <div class="brand-sub">K.COM Pro Analysis</div>
+        </div>
+    </div>
+
+    <!-- PAINEL PRINCIPAL / DADOS -->
+    <div class="main-panel">
+        
+        <div class="tabs">
+            <div class="tab-btn active" id="btn-calc" onclick="showTab('calc')">CALC</div>
+            <div class="tab-btn" id="btnTabWait" onclick="showTab('espera')">⏳ ESPERA (<span id="countEspera">0</span>)</div>
+            <div class="tab-btn" id="btn-campeonatos" onclick="showTab('campeonatos')">CAMP</div>
+            <div class="tab-btn" id="btn-rastreador" onclick="showTab('rastreador')">RAST</div>
+            <div class="tab-btn" id="btn-hist" onclick="showTab('hist')">HIST</div>
+        </div>
+
+        <!-- PAINEL DE ALERTA URGENTE -->
+        <div id="painelAlertaUrgente" style="display: none;"></div>
+
+        <!-- ABA CALCULADORA -->
+        <div id="calc" class="tab-content active">
+            
+            <div id="termometro-container">
+                <div id="term-text">Assertividade: 50%</div>
+                <div id="termometro"><div id="term-bar"></div></div>
+            </div>
+
+<div class="result-box">
+    <div style="display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow-x: auto;">
+        <span style="font-size: 0.9em;">🔥</span>
+        <input type="number" id="res-val-input" value="0.0" step="0.5" readonly 
+               ondblclick="destravarResultado(this)" 
+               onblur="travarResultado(this); recalcularComValorManual(this)" 
+               oninput="recalcularComValorManual(this)"
+               style="font-size: 1.1em; font-weight: bold; color: #fbbf24; background: transparent; border: 1px dashed transparent; width: 55px; padding: 2px 2px; border-radius: 6px; text-align: center; outline: none; -moz-appearance: textfield;"
+               title="Dê dois cliques para editar o limite manualmente">
+        <span style="font-size: 1.2em; font-weight: bold; color: #fbbf24;">Escanteio Limite</span>
+    </div>
+    <div style="font-size: 0.8em; color: #a1a1aa; padding-left: 2px;">👉 (Estrategia Funil)</div>
+    <div id="sub-res" class="sub-res-linha" style="font-size: 0.9em; color: #4ade80; margin-top: 2px;">🚩 Projeção ht: 0 Escanteios</div>
+    
+    <div id="appm-res" class="appm-val">APPM: 0.00</div>
+    <div id="conf-val" class="conf-val">Confiança: 0%</div>
+
+    <div id="obs-confronto" class="obs-box">
+        💡 <b>Observação (Histórico):</b> Digite o nome dos times para ver as médias acumuladas.
+    </div>
+    
+    <div id="rastreador-live-box" class="rastreador-alert" style="display: none;">
+        <span id="rastreador-status" style="font-weight:bold;">📡 RASTREADOR: AGUARDANDO DADOS</span>
+        <div id="rastreador-details">Preencha as informações do jogo.</div>
+    </div>
+</div>
+
+            <div class="tempo-selector">
+                <button type="button" class="tempo-btn active" id="btn-mode-ht" onclick="setModoTempo('HT')">HT (1º Tempo)</button>
+                <button type="button" class="tempo-btn" id="btn-mode-pg" onclick="setModoTempo('FT')">FT (90 Min)</button>
+            </div>
+
+            <div class="inputs-grid" id="inputGroup">
+                <!-- SELETOR DE PAÍS / LIGA -->
+                <div class="country-select-wrapper full-width">
+                    <button type="button" class="country-btn" id="countryBtn">
+                        <span id="countrySelected">🌐 Selecionar País / Liga</span>
+                        <small>▼</small>
+                    </button>
+                    <div class="country-dropdown" id="countryDropdown">
+                        <input type="text" id="countrySearch" class="country-search" placeholder="Buscar país..." autocomplete="off">
+                        <div class="country-list" id="countryList"></div>
+                    </div>
+                </div>
+
+                <input type="text" id="ligaManual" class="full-width" placeholder="Ou digite o Nome da Liga / País Manualmente aqui..." style="text-align: left;">
+
+                <input type="number" id="minuto" class="numeric full-width" placeholder="Minuto Atual">
+                
+                <div class="autocomplete-wrapper">
+                    <input type="text" id="time1" placeholder="Time A" autocomplete="off">
+                    <div id="list-time1" class="autocomplete-list"></div>
+                </div>
+
+                <div class="autocomplete-wrapper">
+                    <input type="text" id="time2" placeholder="Time B" autocomplete="off">
+                    <div id="list-time2" class="autocomplete-list"></div>
+                </div>
+
+                <input type="number" id="gols1" class="numeric" placeholder="Gols A">
+                <input type="number" id="gols2" class="numeric" placeholder="Gols B">
+                <input type="number" id="cantos1" class="numeric" placeholder="Cantos A">
+                <input type="number" id="cantos2" class="numeric" placeholder="Cantos B">
+                <input type="number" id="atq1" class="numeric" placeholder="Atq. Perigoso A">
+                <input type="number" id="atq2" class="numeric" placeholder="Atq. Perigoso B">
+            </div>
+
+            <div class="action-bar">
+                <button type="button" onclick="salvarManual()" class="btn-action btn-blue">Salvar</button>
+                <button type="button" onclick="calcular()" class="btn-action btn-green">Analisar</button>
+                <button type="button" onclick="adicionarAEspera()" class="btn-action btn-yellow">A Espera ⏳</button>
+                <button type="button" onclick="limparDados()" class="btn-action btn-red">Limpar</button>
+            
+                <button type="button" onclick="dispararSinalTelegramAtual()" class="btn-action btn-telegram">📤 Enviar Sinal para o Telegram</button>
+            </div>
+
+        </div>
+
+        <!-- ABA SALA DE ESPERA -->
+        <div id="espera" class="tab-content">
+            <div class="history-card">
+                <div class="history-header">
+                    <h2>⏳ Partidas em Espera Cronometrada</h2>
+                    <button class="btn-clear" onclick="limparTodaEspera()">Limpar Tudo</button>
+                </div>
+                <div id="esperaLista"></div>
+            </div>
+        </div>
+
+        <!-- ABA CAMPEONATOS -->
+        <div id="campeonatos" class="tab-content">
+            <h3>🏆 Gestão de Campeonatos e Times</h3>
+
+            <div class="card-stat" style="border-color: #6366f1; background: #13131a;">
+                <h4 style="color:#a5b4fc; margin-bottom: 6px;">🤖 Pedir Lista ao Gemini:</h4>
+                <div style="font-size: 0.82em; color: #e2e8f0; background: #09090b; padding: 8px; border-radius: 6px; border: 1px solid var(--border); margin-bottom: 8px; font-style: italic;" id="textoComando">
+                    Gemini, me mande a lista de times do campeonato [NOME DO CAMPEONATO] no formato correto para a calculadora.
+                </div>
+                <button type="button" class="btn-action btn-yellow" style="width: 100%; padding: 10px; font-size: 0.85em;" onclick="copiarComando()">📋 Copiar Frase</button>
+            </div>
+
+            <div class="card-stat">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                    <input type="text" id="campNome" placeholder="Nome (ex: Brasileirão)" style="text-align: left;">
+                    <select id="campPais" style="text-align: left;">
+                        <option value="">Selecione o País</option>
+                    </select>
+                </div>
+                <textarea id="campLista" rows="5" placeholder="Cole aqui a lista de times fornecida pelo Gemini..." style="text-align: left; resize: vertical;"></textarea>
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <button type="button" class="btn-action btn-blue" style="flex:1;" onclick="registrarCampeonato()">Registrar</button>
+                    <button type="button" class="btn-action btn-green" style="flex:1;" onclick="atualizarCampeonato()">Atualizar</button>
+                </div>
+            </div>
+
+            <h4 style="color:#a5b4fc; margin-top: 6px;">Campeonatos Cadastrados:</h4>
+            <div id="listaCampeonatosCadastrados"></div>
+        </div>
+
+        <!-- ABA RASTREADOR -->
+        <div id="rastreador" class="tab-content">
+            <h3>📡 Visão Geral do Rastreador</h3>
+            
+            <div class="card-stat" style="border-color: #6366f1; background: #13131a;">
+                <h4 style="color:#a5b4fc;">⚔️ Análise do Confronto Direct (Histórico)</h4>
+                <div id="stat-confronto" style="margin-top:8px; font-size:0.85em; line-height:1.5; color:#e2e8f0;">
+                    Digite os nomes des times na aba Calculadora para rastrear o histórico das equipes.
+                </div>
+            </div>
+
+            <div class="card-stat">
+                <h4 style="color:#38bdf8;">⏱️ Minutos Ideais</h4>
+                <p id="stat-minutos">Carregando...</p>
+            </div>
+            <div class="card-stat">
+                <h4 style="color:#38bdf8;">⚡ Média de APPM de Sucesso</h4>
+                <p id="stat-appm">Carregando...</p>
+            </div>
+            <div class="card-stat">
+                <h4 style="color:#38bdf8;">⚔️ Ataques Perigosos Ideais</h4>
+                <p id="stat-atq">Carregando...</p>
+            </div>
+            <div class="card-stat">
+                <h4 style="color:#38bdf8;">🌍 Ligas Lucrativas</h4>
+                <div id="stat-ligas">Carregando...</div>
+            </div>
+        </div>
+
+        <!-- ABA HISTÓRICO -->
+        <div id="hist" class="tab-content">
+            <h3>Histórico Recente</h3>
+            <div id="listaHistorico"></div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+const TG_TOKEN = "8427077212:AAEiL_3_D_-fukuaR95V3FqoYYyHvdCHmEI";
+const TG_CHAT_ID = "-1003355965894";
+
+async function enviarTelegramSimples(textoMensagem) {
+    let url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHAT_ID}&text=` + encodeURIComponent(textoMensagem) + `&parse_mode=Markdown`;
+
+    try {
+        let response = await fetch(url);
+        let data = await response.json();
+        if (!data.ok) {
+            console.error("Erro ao enviar para o Telegram:", data);
+        }
+    } catch (err) {
+        console.error("Erro de rede ao enviar telegram:", err);
+    }
+}
+
+const dbPaises = [
+  { fifa: "INT", flag: "un", nome: "🌍 Mundial / Seleções (Geral)" },
+  { fifa: "UCL", flag: "eu", nome: "🏆 UEFA Champions League" },
+  { fifa: "UEL", flag: "eu", nome: "🥈 UEFA Europa League" },
+  { fifa: "UECL", flag: "eu", nome: "🥉 UEFA Conference League" },
+  { fifa: "LIB", flag: "un", nome: "🏆 Copa Libertadores" },
+  { fifa: "SUL", flag: "un", nome: "🥈 Copa Sul-Americana" },
+  { fifa: "BRA", flag: "br", nome: "Brasil Série A" },
+  { fifa: "BRA", flag: "br", nome: "Brasil Série B" },
+  { fifa: "ARG", flag: "ar", nome: "Argentina Liga Profesional" },
+  { fifa: "ENG", flag: "gb-eng", nome: "Inglaterra Premier League" },
+  { fifa: "ESP", flag: "es", nome: "Espanha LaLiga" },
+  { fifa: "GER", flag: "de", nome: "Alemanha Bundesliga" },
+  { fifa: "ITA", flag: "it", nome: "Itália Serie A" },
+  { fifa: "FRA", flag: "fr", nome: "França Ligue 1" },
+  { fifa: "POR", flag: "pt", nome: "Portugal Liga Portugal" },
+  { fifa: "USA", flag: "us", nome: "Estados Unidos Major League Soccer" },
+  { fifa: "JPN", flag: "jp", nome: "Japão J1 League" }
+];
+
+let paisSelecionado = null;
+let db = JSON.parse(localStorage.getItem('kcom_data') || '{}');
+let dbCampeonatos = JSON.parse(localStorage.getItem('kcom_campeonatos') || '{}');
+let listaEspera = JSON.parse(localStorage.getItem('kcom_espera') || '[]');
+let modoTempoSelecionado = 'HT';
+let datasAbertas = {}; 
+
+let intervalId = null;
+let somAlertaIntervalId = null;
+let audioCtx = null;
+
+const countryBtn = document.getElementById('countryBtn');
+const countryDropdown = document.getElementById('countryDropdown');
+const countrySearch = document.getElementById('countrySearch');
+const countryList = document.getElementById('countryList');
+const countrySelected = document.getElementById('countrySelected');
+
+function renderPaises(lista) {
+    countryList.innerHTML = '';
+    const selectPaisElem = document.getElementById('campPais');
+    selectPaisElem.innerHTML = '<option value="">Selecione o País</option>';
+
+    lista.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'country-item';
+        item.innerHTML = `
+            <img src="https://flagcdn.com/w20/${p.flag}.png" class="flag-img">
+            <b style="color:#38bdf8; width:32px;">${p.fifa}</b>
+            <span>${p.nome}</span>
+        `;
+        item.onclick = () => {
+            paisSelecionado = p;
+            countrySelected.innerHTML = `<img src="https://flagcdn.com/w20/${p.flag}.png" class="flag-img"> <b style="color:#38bdf8;">[${p.fifa}]</b> ${p.nome}`;
+            document.getElementById('ligaManual').value = ''; 
+            countryDropdown.classList.remove('open');
+        };
+        countryList.appendChild(item);
+
+        const opt = document.createElement('option');
+        opt.value = p.nome;
+        opt.textContent = p.nome;
+        selectPaisElem.appendChild(opt);
+    });
+}
+
+renderPaises(dbPaises);
+
+countryBtn.onclick = () => {
+    countryDropdown.classList.toggle('open');
+    if (countryDropdown.classList.contains('open')) {
+        countrySearch.value = '';
+        renderPaises(dbPaises);
+        countrySearch.focus();
+    }
+};
+
+countrySearch.oninput = (e) => {
+    const t = e.target.value.toLowerCase();
+    renderPaises(dbPaises.filter(p => p.nome.toLowerCase().includes(t) || p.fifa.toLowerCase().includes(t)));
+};
+
+document.addEventListener('click', (e) => {
+    if (!countryBtn.contains(e.target) && !countryDropdown.contains(e.target)) {
+        countryDropdown.classList.remove('open');
+    }
+    if (!e.target.closest('.autocomplete-wrapper')) {
+        document.querySelectorAll('.autocomplete-list').forEach(l => l.style.display = 'none');
+    }
+});
+
+function obterNomeLigaAtual() {
+    const manual = document.getElementById('ligaManual').value.trim();
+    if (manual) return manual;
+    if (paisSelecionado) return paisSelecionado.nome;
+    return 'Futebol ao Vivo';
+}
+
+function copiarComando() {
+    const texto = document.getElementById('textoComando').innerText;
+    navigator.clipboard.writeText(texto).then(() => {
+        alert('Frase copiada com sucesso! Agora é só colar para o Gemini.');
+    }).catch(err => {
+        alert('Erro ao copiar frase: ' + err);
+    });
+}
+
+function processarListaTimes(textoBruto) {
+    return textoBruto
+        .split(/[\n,]+/)
+        .map(t => t.trim().replace(/^[0-9]+\s*[\.\-–\)]\s*/, ''))
+        .filter(t => t.length > 0);
+}
+
+function registrarCampeonato() {
+    const nome = document.getElementById('campNome').value.trim();
+    const pais = document.getElementById('campPais').value;
+    const listaTexto = document.getElementById('campLista').value;
+
+    if (!nome || !pais || !listaTexto) {
+        alert('Preencha o Nome do Campeonato, País e a Lista de Times.');
+        return;
+    }
+
+    const times = processarListaTimes(listaTexto);
+    dbCampeonatos[nome] = { nome: nome, pais: pais, times: times };
+    localStorage.setItem('kcom_campeonatos', JSON.stringify(dbCampeonatos));
+    alert(`Campeonato "${nome}" registrado com sucesso com ${times.length} times!`);
+    renderizarCampeonatos();
+    limparFormCampeonato();
+}
+
+function atualizarCampeonato() { registrarCampeonato(); }
+
+function deletarCampeonato(nome) {
+    if (confirm(`Deseja deletar o campeonato ${nome}?`)) {
+        delete dbCampeonatos[nome];
+        localStorage.setItem('kcom_campeonatos', JSON.stringify(dbCampeonatos));
+        renderizarCampeonatos();
+    }
+}
+
+function carregarParaEdicao(nome) {
+    const c = dbCampeonatos[nome];
+    if (c) {
+        document.getElementById('campNome').value = c.nome;
+        document.getElementById('campPais').value = c.pais;
+        document.getElementById('campLista').value = c.times.join('\n');
+    }
+}
+
+function limparFormCampeonato() {
+    document.getElementById('campNome').value = '';
+    document.getElementById('campPais').value = '';
+    document.getElementById('campLista').value = '';
+}
+
+function renderizarCampeonatos() {
+    const container = document.getElementById('listaCampeonatosCadastrados');
+    let html = '';
+    for (let c in dbCampeonatos) {
+        const item = dbCampeonatos[c];
+        html += `
+            <div class="item" style="border-color:#38bdf8;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <strong style="color:#4ade80;">${item.nome}</strong> (${item.pais})<br>
+                        <small style="color:#a1a1aa;">${item.times.length} times: ${item.times.slice(0, 4).join(', ')}...</small>
+                    </div>
+                </div>
+                <div style="margin-top:8px;">
+                    <button class="btn-hist" style="color:#38bdf8; background:#1e3a8a;" onclick="carregarParaEdicao('${item.nome}')">✏️ Editar</button>
+                    <button class="btn-hist" style="color:#ef4444; background:#7f1d1d;" onclick="deletarCampeonato('${item.nome}')">🗑️ Deletar</button>
+                </div>
+            </div>
+        `;
+    }
+    container.innerHTML = html || '<p style="color:#a1a1aa;">Nenhum campeonato registrado ainda.</p>';
+}
+
+function configurarAutocompletar(inputId, listId) {
+    const input = document.getElementById(inputId);
+    const list = document.getElementById(listId);
+
+    input.addEventListener('input', function() {
+        const val = this.value.trim().toLowerCase();
+        list.innerHTML = '';
+        if (val.length < 2) {
+            list.style.display = 'none';
+            return;
+        }
+
+        let timesDisponiveis = [];
+        for (let c in dbCampeonatos) {
+            const camp = dbCampeonatos[c];
+            if (!paisSelecionado || camp.pais.toLowerCase() === paisSelecionado.nome.toLowerCase()) {
+                timesDisponiveis = timesDisponiveis.concat(camp.times);
+            }
+        }
+        if (timesDisponiveis.length === 0) {
+            for (let c in dbCampeonatos) {
+                timesDisponiveis = timesDisponiveis.concat(dbCampeonatos[c].times);
+            }
+        }
+        timesDisponiveis = [...new Set(timesDisponiveis)];
+        const correspondencias = timesDisponiveis.filter(t => t.toLowerCase().includes(val));
+
+        if (correspondencias.length > 0) {
+            correspondencias.forEach(t => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.textContent = t.toUpperCase();
+                item.onclick = function() {
+                    input.value = t.toUpperCase();
+                    list.style.display = 'none';
+                    calcular();
+                };
+                list.appendChild(item);
+            });
+            list.style.display = 'block';
+        } else {
+            list.style.display = 'none';
+        }
+    });
+}
+
+configurarAutocompletar('time1', 'list-time1');
+configurarAutocompletar('time2', 'list-time2');
+
+const inputs = Array.from(document.querySelectorAll('#inputGroup input'));
+inputs.forEach((input, index) => {
+    if (input.type === 'number') {
+        input.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            
+            if (this.id === 'minuto' && this.value !== '') {
+                let minNum = parseInt(this.value);
+                if (!isNaN(minNum)) {
+                    if (minNum < 46) {
+                        setModoTempo('HT');
+                    } else {
+                        setModoTempo('FT');
+                    }
+                }
+            }
+
+            if (this.value.length >= 2) {
+                this.value = this.value.slice(0, 2);
+                let nextInput = inputs[index + 1];
+                while (nextInput && nextInput.style.visibility === 'hidden') {
+                    index++;
+                    nextInput = inputs[index + 1];
+                }
+                if (nextInput) nextInput.focus();
+            }
+            calcular();
+        });
+    } else if (input.id !== 'countrySearch') {
+        input.addEventListener('input', calcular);
+    }
+});
+
+document.addEventListener('focusin', function(e) {
+    if (e.target.matches('input, select, textarea')) {
+        setTimeout(() => {
+            e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 350);
+    }
+});
+
+function toggleData(date) {
+    datasAbertas[date] = !datasAbertas[date];
+    renderizar();
+}
+
+function deletarDia(date) {
+    if (confirm(`Deseja realmente excluir todas as análises do dia ${date}?`)) {
+        delete db[date];
+        delete datasAbertas[date];
+        localStorage.setItem('kcom_data', JSON.stringify(db));
+        renderizar();
+    }
+}
+
+function renderizar() {
+    let lista = document.getElementById('listaHistorico');
+    let html = '';
+    let greens = 0, reds = 0;
+
+    for (let date in db) {
+        let isOpen = datasAbertas[date] || false;
+        html += `
+            <div style="margin-top:10px; background:#09090b; border: 1px solid var(--border); border-radius: 8px; overflow: hidden;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #18181b; cursor: pointer;" onclick="toggleData('${date}')">
+                    <span style="font-weight:bold; color:#a1a1aa; font-size:0.85em;">📅 ${date} (${db[date].length} análises)</span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button class="btn-hist" style="color:#ef4444; background:#7f1d1d; padding: 4px 8px; font-size: 0.75em;" onclick="event.stopPropagation(); deletarDia('${date}')">🗑️ Excluir Dia</button>
+                        <span style="color:#a1a1aa; font-size: 0.85em;">${isOpen ? '▲' : '▼'}</span>
+                    </div>
+                </div>
+                <div style="display: ${isOpen ? 'block' : 'none'}; padding: 8px;">
+        `;
+
+        db[date].forEach(i => {
+            if(i.status === 'G') greens++; else if(i.status === 'R') reds++;
+            
+            let cf1Val = i.dadosBrutos.cantos1Final !== undefined && i.dadosBrutos.cantos1Final !== null ? i.dadosBrutos.cantos1Final : '';
+            let cf2Val = i.dadosBrutos.cantos2Final !== undefined && i.dadosBrutos.cantos2Final !== null ? i.dadosBrutos.cantos2Final : '';
+
+            let corBorda = '#3f3f46';
+            if(i.status === 'G') corBorda = '#4ade80';
+            else if(i.status === 'R') corBorda = '#ef4444';
+            else if(i.status === 'REEMBOLSO') corBorda = '#eab308';
+
+            html += `
+                <div class="item" style="border-color:${corBorda}">
+                    ${i.text}
+                    
+                    <div style="margin-top:8px; padding:6px; background:#000000; border-radius:6px; display:flex; align-items:center; justify-content:space-between; gap:6px;">
+                        <span style="font-size:0.75em; color:#38bdf8; font-weight:bold;">🚩 Cantos Finais (2x cliques p/ editar):</span>
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <input type="number" id="cf1_${i.id}" value="${cf1Val}" placeholder="T1" readonly 
+                                   ondblclick="destravarInput(this)" 
+                                   onblur="travarInput(this); atualizarCantosFinais('${date}', ${i.id})" 
+                                   oninput="atualizarCantosFinais('${date}', ${i.id})" 
+                                   style="width: 45px; padding: 4px; background: #1e293b; color: #fff; border: 1px solid #334155; border-radius: 4px; text-align: center; font-size: 0.85em; cursor: pointer;">
+                            <span>x</span>
+                            <input type="number" id="cf2_${i.id}" value="${cf2Val}" placeholder="T2" readonly 
+                                   ondblclick="destravarInput(this)" 
+                                   onblur="travarInput(this); atualizarCantosFinais('${date}', ${i.id})" 
+                                   oninput="atualizarCantosFinais('${date}', ${i.id})" 
+                                   style="width: 45px; padding: 4px; background: #1e293b; color: #fff; border: 1px solid #334155; border-radius: 4px; text-align: center; font-size: 0.85em; cursor: pointer;">
+                        </div>
+                    </div>
+
+                    <div style="margin-top:6px;">
+                        <button class="btn-hist" style="color:#4ade80; background:#14532d;" onclick="marcar('${date}', ${i.id}, 'G')">✅ Green</button>
+                        <button class="btn-hist" style="color:#ef4444; background:#7f1d1d;" onclick="marcar('${date}', ${i.id}, 'R')">🟥 Red</button>
+                        <button class="btn-hist" style="color:#facc15; background:#713f12;" onclick="carregarParaTelaPrincipal('${date}', ${i.id})">🔄 Reeditar</button>
+                        <button class="btn-hist" style="color:#a1a1aa; background:#27272a;" onclick="deletar('${date}', ${i.id})">🗑️ Deletar</button>
+                    </div>
+                </div>`;
+        });
+
+        html += `</div></div>`;
+    }
+    lista.innerHTML = html || '<p style="color:#a1a1aa; font-size:0.85em;">Nenhum registro salvo.</p>';
+    
+    const total = greens + reds;
+    const percent = total > 0 ? Math.round((greens / total) * 100) : 50;
+    document.getElementById('term-text').innerText = `Assertividade: ${percent}%`;
+    document.getElementById('term-bar').style.width = percent + "%";
+
+    atualizarRastreadorEstatisticas();
+    renderizarCampeonatos();
+}
+
+function carregarParaTelaPrincipal(date, id) {
+    let item = db[date].find(i => i.id === id);
+    if (!item || !item.dadosBrutos) return;
+
+    const d = item.dadosBrutos;
+    
+    document.getElementById('minuto').value = d.minuto || '';
+    document.getElementById('time1').value = d.time1 || '';
+    document.getElementById('time2').value = d.time2 || '';
+    document.getElementById('gols1').value = d.gols1 || '';
+    document.getElementById('gols2').value = d.gols2 || '';
+    document.getElementById('cantos1').value = d.cantos1 || '';
+    document.getElementById('cantos2').value = d.cantos2 || '';
+    document.getElementById('atq1').value = d.atq1 || '';
+    document.getElementById('atq2').value = d.atq2 || '';
+    
+    if (d.pais) {
+        document.getElementById('ligaManual').value = d.pais;
+    }
+
+    if (d.modoTempo) {
+        setModoTempo(d.modoTempo);
+    }
+
+    showTab('calc');
+    calcular();
+    alert('Informações carregadas para edição na tela principal!');
+}
+
+function destravarInput(input) {
+    input.removeAttribute('readonly');
+    input.style.borderColor = '#6366f1';
+    input.focus();
+}
+
+function travarInput(input) {
+    input.setAttribute('readonly', 'true');
+    input.style.borderColor = '#334155';
+}
+
+function destravarResultado(input) {
+    input.removeAttribute('readonly');
+    input.style.borderColor = '#6366f1';
+    input.style.background = '#1e1e24';
+    input.focus();
+    input.select();
+}
+
+function travarResultado(input) {
+    input.setAttribute('readonly', 'true');
+    input.style.borderColor = 'transparent';
+    input.style.background = 'transparent';
+}
+
+function recalcularComValorManual(input) {
+    let val = parseFloat(input.value);
+    if (!isNaN(val)) {
+        let projPersonalizada = (val + 0.5);
+        let rotuloTempo = modoTempoSelecionado.toLowerCase();
+        document.getElementById('sub-res').innerHTML = `🚩 Projeção ${rotuloTempo}: ${projPersonalizada.toFixed(0)} Escanteios (Manual)`;
+    }
+}
+
+function atualizarCantosFinais(date, id) {
+    let item = db[date].find(i => i.id === id);
+    if (item) {
+        let val1 = parseInt(document.getElementById(`cf1_${id}`).value);
+        let val2 = parseInt(document.getElementById(`cf2_${id}`).value);
+
+        item.dadosBrutos.cantos1Final = !isNaN(val1) ? val1 : null;
+        item.dadosBrutos.cantos2Final = !isNaN(val2) ? val2 : null;
+        item.dadosBrutos.cantosTotalFinal = (!isNaN(val1) && !isNaN(val2)) ? (val1 + val2) : null;
+
+        localStorage.setItem('kcom_data', JSON.stringify(db));
+        atualizarRastreadorEstatisticas(); 
+    }
+}
+
+function showTab(id) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.getElementById('btn-' + id)?.classList.add('active');
+    if(id === 'espera') document.getElementById('btnTabWait').classList.add('active');
+}
+
+function marcar(date, id, status) {
+    let item = db[date].find(i => i.id === id);
+    if (item) {
+        item.status = status;
+        localStorage.setItem('kcom_data', JSON.stringify(db));
+        
+        let emojiStatus = status === 'G' ? '🟢 *GREEN CONFIRMADO!*' : status === 'R' ? '🔴 *RED*' : '🟡 *REEMBOLSO / ANULADO*';
+        
+        let inputCf1 = document.getElementById(`cf1_${id}`);
+        let inputCf2 = document.getElementById(`cf2_${id}`);
+        
+        let c1F = inputCf1 && inputCf1.value !== '' ? inputCf1.value : (item.dadosBrutos.cantos1Final !== null && item.dadosBrutos.cantos1Final !== undefined ? item.dadosBrutos.cantos1Final : '?');
+        let c2F = inputCf2 && inputCf2.value !== '' ? inputCf2.value : (item.dadosBrutos.cantos2Final !== null && item.dadosBrutos.cantos2Final !== undefined ? item.dadosBrutos.cantos2Final : '?');
+        let cTotF = (c1F !== '?' && c2F !== '?') ? (Number(c1F) + Number(c2F)) : '?';
+
+        let lembreteAnalise = (item.dadosBrutos.modoTempo === 'HT') 
+            ? "⚠️ *Lembrete:* Análise feita com foco no 1º Tempo (HT)." 
+            : "⚠️ *Lembrete:* Análise feita com foco em Jogo Completo (FT / 90 Min).";
+
+        let msgRes = `${emojiStatus}\n\n⚽ ${item.dadosBrutos.time1} vs ${item.dadosBrutos.time2}\n🚩 Cantos Finais: *${c1F} x ${c2F} (Total: ${cTotF})*\n${lembreteAnalise}\n📊 Status de Escanteios atualizado!`;
+        enviarTelegramSimples(msgRes);
+    }
+    renderizar();
+}
+
+function deletar(date, id) {
+    db[date] = db[date].filter(i => i.id !== id);
+    if (db[date].length === 0) delete db[date];
+    localStorage.setItem('kcom_data', JSON.stringify(db));
+    renderizar();
+}
+
+function setModoTempo(modo) {
+    modoTempoSelecionado = modo;
+    document.querySelectorAll('.tempo-btn').forEach(b => b.classList.remove('active'));
+    if(modo === 'HT') document.getElementById('btn-mode-ht').classList.add('active');
+    if(modo === 'FT') document.getElementById('btn-mode-pg').classList.add('active');
+    calcular();
+}
+
+function extrairDadosValidos() {
+    let itens = [];
+    for (let d in db) {
+        db[d].forEach(i => { if (i.dadosBrutos) itens.push(i); });
+    }
+    return itens;
+}
+
+function obterEstatisticasEquipe(nomeEquipe) {
+    if (!nomeEquipe) return null;
+    const todosItens = extrairDadosValidos();
+    const nomeUpper = nomeEquipe.trim().toUpperCase();
+
+    let partidas = 0;
+    let cantosHTSoma = 0;
+    let cantosGeralSoma = 0;
+
+    todosItens.forEach(i => {
+        const t1 = (i.dadosBrutos.time1 || '').trim().toUpperCase();
+        const t2 = (i.dadosBrutos.time2 || '').trim().toUpperCase();
+
+        let isEquipeT1 = (t1 === nomeUpper);
+        let isEquipeT2 = (t2 === nomeUpper);
+
+        if (isEquipeT1 || isEquipeT2) {
+            partidas++;
+            let c1FinalReal = i.dadosBrutos.cantos1Final;
+            let c2FinalReal = i.dadosBrutos.cantos2Final;
+            let temFinalReal = (c1FinalReal !== null && c1FinalReal !== undefined && c2FinalReal !== null && c2FinalReal !== undefined);
+
+            let cantosEquipe = 0;
+            if (temFinalReal) {
+                if (isEquipeT1 && !isEquipeT2) cantosEquipe = c1FinalReal;
+                else if (isEquipeT2 && !isEquipeT1) cantosEquipe = c2FinalReal;
+                else cantosEquipe = (c1FinalReal + c2FinalReal) / 2;
+
+                cantosHTSoma += Math.round(cantosEquipe / 2); 
+                cantosGeralSoma += cantosEquipe;
+            } else {
+                const c1 = Number(i.dadosBrutos.cantos1 || 0);
+                const c2 = Number(i.dadosBrutos.cantos2 || 0);
+                const totalJogo = Number(i.dadosBrutos.cantosTotal || (c1 + c2));
+                const min = Number(i.dadosBrutos.minuto || 45);
+
+                if (isEquipeT1 && !isEquipeT2) cantosEquipe = c1;
+                else if (isEquipeT2 && !isEquipeT1) cantosEquipe = c2;
+                else cantosEquipe = totalJogo / 2;
+                
+                let htProjetado = min <= 45 ? cantosEquipe : Math.round((cantosEquipe / min) * 45);
+                let geralProjetado = Math.round((cantosEquipe / min) * 90);
+
+                cantosHTSoma += htProjetado;
+                cantosGeralSoma += geralProjetado;
+            }
+        }
+    });
+
+    if (partidas === 0) return null;
+    return {
+        partidas,
+        mediaHT: (cantosHTSoma / partidas).toFixed(1),
+        mediaGeral: (cantosGeralSoma / partidas).toFixed(1)
+    };
+}
+
+function atualizarRastreadorEstatisticas() {
+    const itens = extrairDadosValidos().filter(i => i.status === 'G');
+    if (itens.length === 0) {
+        document.getElementById('stat-minutos').innerText = "Janela Recomendada: 15' a 38' (HT)";
+        document.getElementById('stat-appm').innerText = "APPM Mínimo: >= 1.00";
+        document.getElementById('stat-atq').innerText = "Ataques Perigosos: >= 1 por min";
+        document.getElementById('stat-ligas').innerText = "Sem dados de Greens gravados.";
+    } else {
+        let minSoma = 0, appmSoma = 0, atqSoma = 0;
+        itens.forEach(i => {
+            minSoma += Number(i.dadosBrutos.minuto);
+            appmSoma += Number(i.dadosBrutos.appm);
+            atqSoma += (Number(i.dadosBrutos.atq1) + Number(i.dadosBrutos.atq2));
+        });
+
+        const total = itens.length;
+        document.getElementById('stat-minutos').innerText = `Média: ${(minSoma/total).toFixed(0)}' minutos`;
+        document.getElementById('stat-appm').innerText = `APPM Médio nos acertos: ${(appmSoma/total).toFixed(2)}`;
+        document.getElementById('stat-atq').innerText = `Média de ${(atqSoma/total).toFixed(0)} ataques perigosos`;
+        document.getElementById('stat-ligas').innerText = `${total} Green(s) mapeados no total.`;
+    }
+
+    const t1Nome = document.getElementById('time1').value;
+    const t2Nome = document.getElementById('time2').value;
+    const elConfronto = document.getElementById('stat-confronto');
+    const elObsVisor = document.getElementById('obs-confronto');
+
+    if (!t1Nome && !t2Nome) {
+        elConfronto.innerHTML = "Digite o nome dos times na Calculadora para consultar o histórico de cada equipe.";
+        elObsVisor.innerHTML = "💡 <b>Observação (Histórico):</b> Digite o nome dos times para ver as médias acumuladas.";
+        return;
+    }
+
+    const st1 = obterEstatisticasEquipe(t1Nome);
+    const st2 = obterEstatisticasEquipe(t2Nome);
+
+    let htmlConfronto = "";
+    let htmlObsVisor = "💡 <b>Observação (Histórico):</b><br>";
+
+    if (t1Nome) {
+        if (st1) {
+            let txt1 = `<b>${t1Nome.toUpperCase()}</b> (${st1.partidas} jg): Média HT <b>${st1.mediaHT}</b> | Geral <b>${st1.mediaGeral}</b>`;
+            htmlConfronto += txt1 + "<br>";
+            htmlObsVisor += "• " + txt1 + "<br>";
+        } else {
+            htmlConfronto += `<b>${t1Nome.toUpperCase()}</b>: Sem histórico.<br>`;
+            htmlObsVisor += `• <b>${t1Nome.toUpperCase()}</b>: Sem histórico recente.<br>`;
+        }
+    }
+
+    if (t2Nome) {
+        if (st2) {
+            let txt2 = `<b>${t2Nome.toUpperCase()}</b> (${st2.partidas} jg): Média HT <b>${st2.mediaHT}</b> | Geral <b>${st2.mediaGeral}</b>`;
+            htmlConfronto += txt2 + "<br>";
+            htmlObsVisor += "• " + txt2 + "<br>";
+        } else {
+            htmlConfronto += `<b>${t2Nome.toUpperCase()}</b>: Sem histórico.<br>`;
+            htmlObsVisor += `• <b>${t2Nome.toUpperCase()}</b>: Sem histórico recente.<br>`;
+        }
+    }
+
+    if (st1 && st2) {
+        const projHT = (Number(st1.mediaHT) + Number(st2.mediaHT)).toFixed(1);
+        const projGeral = (Number(st1.mediaGeral) + Number(st2.mediaGeral)).toFixed(1);
+        
+        htmlConfronto += `<hr style="border-color:#3f3f46; margin:8px 0;">🎯 <b>MÉDIA ESPERADA DO CONFRONTO:</b><br>`;
+        htmlConfronto += `⚡ HT: <b style="color:#4ade80;">${projHT} cantos</b> | 🔥 Geral: <b style="color:#38bdf8;">${projGeral} cantos</b>`;
+        htmlObsVisor += `🎯 <b>Média do Confronto:</b> HT <b style="color:#4ade80;">${projHT}</b> | Geral <b style="color:#38bdf8;">${projGeral}</b>`;
+    }
+
+    elConfronto.innerHTML = htmlConfronto;
+    elObsVisor.innerHTML = htmlObsVisor;
+}
+
+function calcular() {
+    const min = parseInt(document.getElementById('minuto').value);
+    const c1 = parseInt(document.getElementById('cantos1').value || 0);
+    const c2 = parseInt(document.getElementById('cantos2').value || 0);
+    const cant = c1 + c2;
+    const atq1 = parseInt(document.getElementById('atq1').value || 0);
+    const atq2 = parseInt(document.getElementById('atq2').value || 0);
+    const atq = atq1 + atq2;
+
+    atualizarRastreadorEstatisticas();
+    
+    if (!min || isNaN(cant)) {
+        document.getElementById('rastreador-live-box').style.display = 'none';
+        return;
+    }
+    
+    let tempoLimite = (modoTempoSelecionado === 'FT') ? 90 : 45; 
+    const proj = Math.round((cant / min) * tempoLimite);
+    const limiteValor = (proj - 0.5).toFixed(1);
+    const rotuloTempo = modoTempoSelecionado.toLowerCase();
+    
+    const inputRes = document.getElementById('res-val-input');
+    if (inputRes && document.activeElement !== inputRes) {
+        inputRes.value = limiteValor;
+    }
+
+    document.getElementById('sub-res').innerHTML = `🚩 Projeção ${rotuloTempo}: ${proj} Escanteios`;
+    
+    const appmCalculado = (atq / min);
+    const appmEl = document.getElementById('appm-res');
+    appmEl.innerText = `APPM: ${appmCalculado.toFixed(2)}`;
+    appmEl.style.color = appmCalculado < 1.00 ? '#ef4444' : appmCalculado <= 1.10 ? '#fbbf24' : '#4ade80';
+
+    const confiancaCalc = Math.min(Math.round((atq / min) * 100), 99);
+    document.getElementById('conf-val').innerText = `Confiança: ${confiancaCalc}%`;
+
+    avaliarRastreadorNoVisor(min, appmCalculado, cant);
+}
+
+function avaliarRastreadorNoVisor(min, appm, cant) {
+    const box = document.getElementById('rastreador-live-box');
+    const statusEl = document.getElementById('rastreador-status');
+    const detailsEl = document.getElementById('rastreador-details');
+    box.style.display = 'block';
+
+    let avisos = [];
+    let erros = 0;
+
+    let minutoAlvo = (modoTempoSelecionado === 'HT') ? 37 : 82;
+    
+    if (modoTempoSelecionado === 'HT') {
+        if (cant >= 4 && min < 37) {
+            erros++;
+            avisos.push(`⚠️ Fazer a entrada aos 37 minutos, porém se o escanteio sair antes dos 37 minutos o ideal é abortar a entrada.`);
+        } else {
+            avisos.push(`✅ Fazer a entrada aos 37 minutos, porém se o escanteio sair antes dos 37 minutos o ideal é abortar a entrada.`);
+        }
+    } else {
+        if (cant >= 8 && min < 82) {
+            erros++;
+            avisos.push(`⚠️ Fazer a entrada aos 82 minutos, porém se o escanteio sair antes dos 82 minutos o ideal é abortar a entrada.`);
+        } else {
+            avisos.push(`✅ Fazer a entrada aos 82 minutos, porém se o escanteio sair antes dos 82 minutos o ideal é abortar a entrada.`);
+        }
+    }
+
+    if (appm < 1.00) { avisos.push("⚠️ APPM baixo (< 1.00)"); erros++; }
+    else { avisos.push("✅ APPM com boa pressão"); }
+
+    if (modoTempoSelecionado === 'HT' && (min < 15 || min > 40)) { avisos.push("⚠️ Minuto fora do pico no HT"); erros++; }
+    else { avisos.push("✅ Minuto dentro do padrão"); }
+
+    if (erros === 0) {
+        statusEl.style.color = '#4ade80';
+        statusEl.innerText = "🛡️ RASTREADOR: ENTRADA SEGURA";
+    } else {
+        statusEl.style.color = '#ef4444';
+        statusEl.innerText = "🚨 RASTREADOR: ATENÇÃO / ABORTAR";
+    }
+    detailsEl.innerHTML = avisos.join('<br>');
+}
+
+function salvarManual() {
+    const min = document.getElementById('minuto').value;
+    const c1 = document.getElementById('cantos1').value || '0';
+    const c2 = document.getElementById('cantos2').value || '0';
+    const cTotal = Number(c1) + Number(c2);
+
+    if (!min) {
+        alert('Informe ao menos o Minuto da partida.');
+        return;
+    }
+
+    const date = new Date().toLocaleDateString('pt-BR');
+    if (!db[date]) db[date] = [];
+    datasAbertas[date] = true;
+    
+    const t1 = (document.getElementById('time1').value.trim() || 'TIME A').toUpperCase();
+    const t2 = (document.getElementById('time2').value.trim() || 'TIME B').toUpperCase();
+    const g1 = document.getElementById('gols1').value || 0;
+    const g2 = document.getElementById('gols2').value || 0;
+    const a1 = document.getElementById('atq1').value || 0;
+    const a2 = document.getElementById('atq2').value || 0;
+    
+    const limiteValor = document.getElementById('res-val-input').value || '0.0';
+    const rotuloTempo = modoTempoSelecionado.toLowerCase();
+    const proj = Math.round((cTotal / Number(min)) * ((modoTempoSelecionado === 'FT') ? 90 : 45));
+
+    const appmCalculado = ((Number(a1) + Number(a2)) / Number(min)) || 0;
+    const confiancaCalc = Math.min(Math.round(((Number(a1) + Number(a2)) / Number(min)) * 100), 99) || 0;
+    const nomeLigaFinal = obterNomeLigaAtual();
+
+    db[date].unshift({ 
+        id: Date.now(), 
+        text: `
+            <div style="color:#38bdf8; font-weight:bold; font-size:0.85em;">🌍 ${nomeLigaFinal}</div>
+            <strong>⚽ ${t1} ${g1} x ${g2} ${t2}</strong><br>
+            ⏱️ Min: <b>${min}'</b> | 🚩 Cantos (Momento): <b>${c1} + ${c2} = ${cTotal}</b><br>
+            🔥 <b>${limiteValor} Escanteio Limite</b><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;👉 (Estrategia Funil)<br>
+            🚩 Projeção ${rotuloTempo}: <b>${proj} Escanteios</b><br>
+            ⚔️ Atq: <b>${a1} x ${a2}</b> | APPM: <b>${appmCalculado.toFixed(2)}</b> | 🎯 Confiança: <b>${confiancaCalc}%</b>
+        `,
+        status: null,
+        dadosBrutos: { 
+            minuto: min, time1: t1, time2: t2, gols1: g1, gols2: g2, cantos1: c1, cantos2: c2, cantosTotal: cTotal,
+            cantos1Final: null, cantos2Final: null, cantosTotalFinal: null,
+            atq1: a1, atq2: a2, appm: appmCalculado, confianca: confiancaCalc, pais: nomeLigaFinal,
+            modoTempo: modoTempoSelecionado
+        }
+    });
+    
+    localStorage.setItem('kcom_data', JSON.stringify(db));
+    renderizar();
+    showTab('hist');
+}
+
+function dispararSinalTelegramAtual() {
+    const min = Number(document.getElementById('minuto').value);
+    const t1 = (document.getElementById('time1').value.trim() || 'TIME A').toUpperCase();
+    const t2 = (document.getElementById('time2').value.trim() || 'TIME B').toUpperCase();
+    const c1 = document.getElementById('cantos1').value || '0';
+    const c2 = document.getElementById('cantos2').value || '0';
+    const cTotal = Number(c1) + Number(c2);
+    const a1 = document.getElementById('atq1').value || '0';
+    const a2 = document.getElementById('atq2').value || '0';
+    const nomeLigaFinal = obterNomeLigaAtual();
+
+    if (!min) {
+        alert('Preencha ao menos o Minuto Atual e os times para enviar o sinal.');
+        return;
+    }
+
+    let minutoAlvo = (modoTempoSelecionado === 'HT') ? 37 : 82;
+    let avisoAbortarSinal = `Fazer a entrada aos ${minutoAlvo} minutos, porém se o escanteio sair antes dos ${minutoAlvo} minutos o ideal é abortar a entrada.`;
+
+    const limiteValor = document.getElementById('res-val-input').value || '0.0';
+    const rotuloTempo = modoTempoSelecionado.toLowerCase();
+    const proj = Math.round((cTotal / Number(min)) * ((modoTempoSelecionado === 'FT') ? 90 : 45));
+    const appmCalc = ((Number(a1) + Number(a2)) / Number(min)).toFixed(2);
+
+    let lembreteSinal = (modoTempoSelecionado === 'HT')
+        ? "⚠️ *Lembrete:* Análise focada no 1º Tempo (HT)."
+        : "⚠️ *Lembrete:* Análise focada em Jogo Completo (FT / 90 Min).";
+
+    let mensagemSinal = `🚨 *NOVO SINAL - RoBET K.C⚽️M PRO* 🚨\n\n` +
+        `🏆 *Liga:* ${nomeLigaFinal}\n` +
+        `⚔️ *Confronto:* ${t1} x ${t2}\n` +
+        `⏱️ *Minuto Atual:* ${min}' min (${modoTempoSelecionado})\n` +
+        `🚩 *Cantos Atuais:* ${c1} x ${c2} (Total: ${cTotal})\n` +
+        `⚡ *APPM:* ${appmCalc}\n\n` +
+        `🔥 *${limiteValor} Escanteio Limite*\n` +
+        `      👉 *(Estrategia Funil)*\n` +
+        `🚩 Projeção ${rotuloTempo}: ${proj} Escanteios\n\n` +
+        `⚠️ *${avisoAbortarSinal}*\n\n` +
+        `${lembreteSinal}`;
+
+    enviarTelegramSimples(mensagemSinal);
+    alert('Sinal disparado com sucesso no seu grupo do Telegram!');
+}
+
+function limparDados() {
+    document.querySelectorAll('#inputGroup input').forEach(i => i.value = '');
+    document.getElementById('res-val-input').value = "0.0";
+    document.getElementById('sub-res').innerHTML = "🚩 Projeção ht: 0 Escanteios";
+    document.getElementById('appm-res').innerText = "APPM: 0.00";
+    document.getElementById('conf-val').innerText = "Confiança: 0%";
+    document.getElementById('obs-confronto').innerHTML = "💡 <b>Observação (Histórico):</b> Digite o nome dos times para ver as médias acumuladas.";
+    document.getElementById('rastreador-live-box').style.display = 'none';
+    paisSelecionado = null;
+    countrySelected.innerHTML = "🌐 Selecionar País / Liga";
+    atualizarRastreadorEstatisticas();
+}
+
+// Funções da Sala de Espera
+function adicionarAEspera() {
+    const tempoSalvo = parseInt(document.getElementById('minuto').value) || 0;
+    const timeCasa = document.getElementById('time1').value.trim() || 'Mandante';
+    const timeFora = document.getElementById('time2').value.trim() || 'Visitante';
+    const estrategia = modoTempoSelecionado;
+    
+    const cantosCasa = parseInt(document.getElementById('cantos1').value) || 0;
+    const cantosFora = parseInt(document.getElementById('cantos2').value) || 0;
+    const golsCasa = parseInt(document.getElementById('gols1').value) || 0;
+    const golsFora = parseInt(document.getElementById('gols2').value) || 0;
+    const atq1 = parseInt(document.getElementById('atq1').value) || 0;
+    const atq2 = parseInt(document.getElementById('atq2').value) || 0;
+    const odd = document.getElementById('res-val-input').value || '1.80';
+    const stakeVal = 100.00;
+
+    const alvoMinutos = (estrategia === "HT") ? 37 : 82;
+    const minutesRestantes = alvoMinutos - tempoSalvo;
+
+    if (minutesRestantes <= 0) {
+        alert(`A partida já passou ou está no tempo alvo (${alvoMinutos} min) para esta estratégia!`);
+        return;
+    }
+
+    const segundosTotaisNecessarios = minutesRestantes * 60;
+    const timestampFim = Date.now() + (segundosTotaisNecessarios * 1000);
+
+    const novoJogoEspera = {
+        id: String(Date.now()), 
+        timeCasa, timeFora, estrategia, tempoSalvo, minutoAnaliseSalvo: tempoSalvo,
+        alvoMinutos, timestampFim, cantosCasa, cantosFora, golsCasa, golsFora, atq1, atq2,
+        odd, stake: stakeVal.toFixed(2), alertado: false
+    };
+
+    listaEspera.push(novoJogoEspera);
+    localStorage.setItem('kcom_espera', JSON.stringify(listaEspera));
+    
+    limparDados();
+    renderizarEspera();
+    atualizarContadorEsperaAbas();
+    alert(`Sucesso! ${timeCasa} x ${timeFora} agendado para a Sala de Espera.`);
+}
+
+function iniciarProcessamentoCronometro() {
+    if(intervalId) clearInterval(intervalId);
+    intervalId = setInterval(() => {
+        let mudouAlgo = false;
+        let temAlertaAtivo = false;
+        let alertasHtml = "";
+
+        listaEspera.forEach(jogo => {
+            const restanteMilissegundos = jogo.timestampFim - Date.now();
+            if (restanteMilissegundos <= 0) {
+                if (!jogo.alertado) {
+                    jogo.alertado = true;
+                    mudouAlgo = true;
+                }
+                temAlertaAtivo = true;
+                alertasHtml += `
+                    <div class="alert-banner">
+                        🚨 ENTRAR NA BET365: <b>${jogo.timeCasa} x ${jogo.timeFora}</b> chegou aos ${jogo.alvoMinutos}'m (${jogo.estrategia})!
+                        <br>
+                        <button onclick="autoPreencherAlertaEspera('${jogo.id}')">Auto Preencher</button>
+                        <button onclick="removerAlertaPainel('${jogo.id}')">Remover Alerta</button>
+                    </div>
+                `;
+            }
+        });
+
+        if (mudouAlgo) {
+            localStorage.setItem('kcom_espera', JSON.stringify(listaEspera));
+        }
+
+        const painel = document.getElementById('painelAlertaUrgente');
+        if (temAlertaAtivo) {
+            painel.innerHTML = alertasHtml;
+            painel.style.display = "flex";
+            painel.style.flexDirection = "column";
+            painel.style.gap = "6px";
+            dispararSireneContinua();
+        } else {
+            painel.style.display = "none";
+            desligarSirene();
+        }
+
+        if (document.getElementById('espera').classList.contains('active')) {
+            renderizarEspera();
+        }
+        atualizarContadorEsperaAbas();
+    }, 1000);
+}
+
+function autoPreencherAlertaEspera(id) {
+    const jogo = listaEspera.find(j => String(j.id) === String(id));
+    if (!jogo) return;
+    
+    showTab('calc');
+    setModoTempo(jogo.estrategia);
+    
+    document.getElementById('time1').value = jogo.timeCasa;
+    document.getElementById('time2').value = jogo.timeFora;
+    document.getElementById('minuto').value = jogo.alvoMinutos; 
+    document.getElementById('gols1').value = jogo.golsCasa || '';
+    document.getElementById('gols2').value = jogo.golsFora || '';
+    document.getElementById('cantos1').value = jogo.cantosCasa || '';
+    document.getElementById('cantos2').value = jogo.cantosFora || '';
+    document.getElementById('atq1').value = jogo.atq1 || '';
+    document.getElementById('atq2').value = jogo.atq2 || '';
+    
+    calcular();
+
+    listaEspera = listaEspera.filter(j => String(j.id) !== String(id));
+    localStorage.setItem('kcom_espera', JSON.stringify(listaEspera));
+    
+    pararSireneSeNaoHouverAlertas();
+    renderizarEspera();
+    atualizarContadorEsperaAbas();
+}
+
+function excluirItemEspera(id) {
+    listaEspera = listaEspera.filter(j => String(j.id) !== String(id));
+    localStorage.setItem('kcom_espera', JSON.stringify(listaEspera));
+    renderizarEspera();
+    atualizarContadorEsperaAbas();
+    pararSireneSeNaoHouverAlertas();
+}
+
+function limparTodaEspera() {
+    if (confirm("Deseja realmente limpar toda a sala de espera?")) {
+        listaEspera = [];
+        localStorage.removeItem('kcom_espera');
+        renderizarEspera();
+        atualizarContadorEsperaAbas();
+        desligarSirene();
+    }
+}
+
+function removerAlertaPainel(id) {
+    excluirItemEspera(id);
+}
+
+function atualizarContadorEsperaAbas() {
+    const count = listaEspera.length;
+    document.getElementById('countEspera').innerText = count;
+}
+
+function renderizarEspera() {
+    const container = document.getElementById('esperaLista');
+    container.innerHTML = '';
+
+    if (listaEspera.length === 0) {
+        container.innerHTML = '<div style="color:#a1a1aa; font-size:0.85em; text-align:center; padding:20px;">Nenhum jogo aguardando tempo alvo.</div>';
+        return;
+    }
+
+    listaEspera.forEach(jogo => {
+        const msec = jogo.timestampFim - Date.now();
+        let tempoTexto = "00:00";
+        let classePronto = "";
+
+        if (msec > 0) {
+            const totalSegundos = Math.floor(msec / 1000);
+            const min = Math.floor(totalSegundos / 60);
+            const seg = totalSegundos % 60;
+            tempoTexto = `${min.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
+        } else {
+            tempoTexto = "PRONTO!";
+            classePronto = "ready";
+        }
+
+        const item = document.createElement('div');
+        item.className = 'waiting-item';
+        item.innerHTML = `
+            <div class="waiting-info">
+                <span class="waiting-teams">${jogo.timeCasa} x ${jogo.timeFora}</span>
+                <span class="waiting-meta">Modo: <b>${jogo.estrategia}</b> | Salvo com: ${jogo.tempoSalvo}'m | Alvo: <b>${jogo.alvoMinutos}'m</b></span>
+            </div>
+            <div style="display: flex; align-items: center;">
+                <div class="waiting-timer ${classePronto}">${tempoTexto}</div>
+                <button class="btn-waiting-delete" onclick="excluirItemEspera('${jogo.id}')">X</button>
+            </div>
+        `;
+        container.appendChild(item);
+    });
+}
+
+function dispararSireneContinua() {
+    if (somAlertaIntervalId) return;
+    try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        somAlertaIntervalId = setInterval(() => {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.15);
+        }, 500);
+    } catch(e) {}
+}
+
+function desligarSirene() {
+    if (somAlertaIntervalId) {
+        clearInterval(somAlertaIntervalId);
+        somAlertaIntervalId = null;
+    }
+}
+
+function pararSireneSeNaoHouverAlertas() {
+    const temAlerta = listaEspera.some(j => (j.timestampFim - Date.now()) <= 0);
+    if (!temAlerta) {
+        desligarSirene();
+        document.getElementById('painelAlertaUrgente').style.display = 'none';
+    }
+}
+
+renderizar();
+renderizarEspera();
+atualizarContadorEsperaAbas();
+iniciarProcessamentoCronometro();
+</script>
+</body>
+</html>
