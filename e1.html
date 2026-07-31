@@ -633,6 +633,18 @@ const TG_TOKEN = "8427077212:AAEiL_3_D_-fukuaR95V3FqoYYyHvdCHmEI";
 const TG_CHAT_ID = "-1003355965894";
 
 async function enviarTelegramSimples(textoMensagem) {
+    // 1. Envia para o servidor do Render (faz cair na aba do site na hora!)
+    try {
+        fetch('https://robet-telegran.onrender.com/api/mensagens', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ texto: textoMensagem })
+        });
+    } catch (err) {
+        console.error("Erro ao enviar sinal para o Render:", err);
+    }
+
+    // 2. Envia para o grupo do Telegram
     let url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHAT_ID}&text=` + encodeURIComponent(textoMensagem) + `&parse_mode=Markdown`;
 
     try {
@@ -1445,7 +1457,7 @@ function dispararSinalTelegramAtual() {
         `${lembreteSinal}`;
 
     enviarTelegramSimples(mensagemSinal);
-    alert('Sinal disparado com sucesso no seu grupo do Telegram!');
+    alert('Sinal disparado com sucesso no seu grupo e no site!');
 }
 
 function limparDados() {
