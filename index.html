@@ -100,10 +100,8 @@
     </div>
 
     <script>
-        // ALTERE AQUI PARA O IP DO SEU COMPUTADOR (ex: http://192.168.1.15:3000/api/mensagens)
-        // Quando hospedar online no Render/Railway, coloque a URL da nuvem aqui.
+        // URL do seu servidor configurado no Render
         const API_URL = 'https://robet-telegran.onrender.com/api/mensagens';
-';
 
         function kcomSwitchTab(evt, abaId) {
             document.querySelectorAll('.kcom-tab-content').forEach(c => c.classList.remove('active'));
@@ -135,7 +133,7 @@
                     container.appendChild(bubble);
                 });
             } catch (err) {
-                container.innerHTML = '<div class="status-msg" style="color: #ef4444;">❌ Erro de conexão com o servidor Node.js.<br><br><small>Verifique se o "node server.js" está rodando e se trocou o "localhost" pelo IP do seu PC no HTML.</small></div>';
+                container.innerHTML = '<div class="status-msg" style="color: #ef4444;">❌ Erro de conexão com o servidor no Render.<br><br><small>Aguarde alguns segundos ou verifique sua conexão.</small></div>';
             }
         }
 
