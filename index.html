@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>K.C⚽️M - Painel com 5 Módulos</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { 
+            background-color: #0f172a; 
+            color: #f8fafc; 
+            padding: 15px; 
+            overscroll-behavior-y: none;
+        }
+        
+        .kcom-container { max-width: 1400px; margin: 0 auto; }
+
+        /* Abas */
+        .kcom-tabs { display: flex; gap: 8px; margin-bottom: 10px; border-bottom: 2px solid #334155; padding-bottom: 1px; flex-wrap: wrap; }
+        .kcom-tab-btn { background-color: #1e293b; color: #94a3b8; border: none; padding: 5px 8px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s; font-size: 9px; }
+        .kcom-tab-btn.active { background-color: #0284c7; color: #fff; }
+
+        /* Conteúdo das Abas */
+        .kcom-tab-content { display: none; background-color: #1e293b; padding: 10px; border-radius: 12px; border: 1px solid #334155; }
+        .kcom-tab-content.active { display: block; }
+
+        .kcom-frame { width: 100%; height: 85vh; border: none; background: #0f172a; border-radius: 8px; }
+
+        /* --- Aba Telegram Chat --- */
+        .chat-container {
+            height: 85vh;
+            background-color: #0f172a;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #334155;
+        }
+        .chat-header {
+            background-color: #1e293b;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #334155;
+            font-size: 11px;
+            color: #38bdf8;
+            font-weight: bold;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message-bubble {
+            background-color: #1e293b;
+            border-left: 4px solid #0284c7;
+            padding: 10px 12px;
+            border-radius: 8px;
+            max-width: 90%;
+            align-self: flex-start;
+        }
+        .message-text { color: #f8fafc; font-size: 13px; white-space: pre-wrap; line-height: 1.4; }
+        .message-time { color: #38bdf8; font-size: 9px; text-align: right; margin-top: 4px; }
+        .status-msg { color: #94a3b8; font-size: 12px; text-align: center; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="kcom-container">
+        <!-- Botões das Abas -->
+        <div class="kcom-tabs">
+            <button class="kcom-tab-btn active" onclick="kcomSwitchTab(event, 'aba1')">k.com RoBET</button>
+            <button class="kcom-tab-btn" onclick="kcomSwitchTab(event, 'aba2')">RoBET Gol</button>
+            <button class="kcom-tab-btn" onclick="kcomSwitchTab(event, 'aba3')">RoBET Fut V.</button>
+            <button class="kcom-tab-btn" onclick="kcomSwitchTab(event, 'aba4')">RoBET Aviator</button>
+            <button class="kcom-tab-btn" style="background-color: #0284c7; color: white;" onclick="kcomSwitchTab(event, 'aba5')">✈️ Telegram Sinais</button>
+        </div>
+
+        <div id="aba1" class="kcom-tab-content active"><iframe src="e1.html" class="kcom-frame"></iframe></div>
+        <div id="aba2" class="kcom-tab-content"><iframe src="g1.html" class="kcom-frame"></iframe></div>
+        <div id="aba3" class="kcom-tab-content"><iframe src="f1.html" class="kcom-frame"></iframe></div>
+        <div id="aba4" class="kcom-tab-content"><iframe src="a1.html" class="kcom-frame"></iframe></div>
+
+        <!-- Aba 5: Telegram VIP -->
+        <div id="aba5" class="kcom-tab-content">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <span>✈️ CANAL DE SINAIS TELEGRAM</span>
+                    <span style="color: #4ade80;">● Conectado</span>
+                </div>
+                <div class="chat-messages" id="chatList">
+                    <div class="status-msg">Conectando ao servidor de sinais...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ALTERE AQUI PARA O IP DO SEU COMPUTADOR (ex: http://192.168.1.15:3000/api/mensagens)
+        // Quando hospedar online no Render/Railway, coloque a URL da nuvem aqui.
+        const API_URL = 'http://localhost:3000/api/mensagens';
+
+        function kcomSwitchTab(evt, abaId) {
+            document.querySelectorAll('.kcom-tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.kcom-tab-btn').forEach(b => b.classList.remove('active'));
+
+            document.getElementById(abaId).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+
+        async function buscarMensagens() {
+            const container = document.getElementById('chatList');
+            try {
+                const res = await fetch(API_URL);
+                const mensagens = await res.json();
+                
+                if (mensagens.length === 0) {
+                    container.innerHTML = '<div class="status-msg">Nenhum sinal recebido ainda. Envie uma mensagem no grupo do Telegram.</div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                mensagens.forEach(msg => {
+                    const bubble = document.createElement('div');
+                    bubble.className = 'message-bubble';
+                    bubble.innerHTML = `
+                        <div class="message-text">${msg.texto}</div>
+                        <div class="message-time">${msg.data}</div>
+                    `;
+                    container.appendChild(bubble);
+                });
+            } catch (err) {
+                container.innerHTML = '<div class="status-msg" style="color: #ef4444;">❌ Erro de conexão com o servidor Node.js.<br><br><small>Verifique se o "node server.js" está rodando e se trocou o "localhost" pelo IP do seu PC no HTML.</small></div>';
+            }
+        }
+
+        setInterval(buscarMensagens, 2000);
+        buscarMensagens();
+    </script>
+</body>
+</html>
